@@ -66,17 +66,18 @@ static uint32_t Calculate_Software_CRC32(uint8_t *data, uint32_t length)
 /**
  * @brief UART2 DMA ReceiveToIdle Başlatma (Normal Mod)
  */
-void UART2_Init(UART_HandleTypeDef *huartx)
+bool UART2_Init(UART_HandleTypeDef *huartx)
 {
     UART2_huartx = huartx;
 
     // Eğer başlatma başarısız olursa (HAL_OK dönmezse) Error Handler'a düşsün ki hatayı görelim!
     if (HAL_UARTEx_ReceiveToIdle_DMA(UART2_huartx, uart2_rx_buffer, UART2_RX_BUFFER_SIZE) != HAL_OK)
     {
-        Error_Handler();
+        return false;
     }
 
     __HAL_DMA_DISABLE_IT(UART2_huartx->hdmarx, DMA_IT_HT);
+    return true;
 }
 
 /**
@@ -86,8 +87,16 @@ void UART2_Send_Data(uint8_t *data, uint16_t length)
 {
     if(length == 0 || length > UART2_TX_BUFFER_SIZE) return;
 
+    uint32_t t0 = HAL_GetTick();
     // 1. Bir önceki gönderimin bitmesini bekle
-    while (UART2_huartx->gState != HAL_UART_STATE_READY) {}
+    while (UART2_huartx->gState != HAL_UART_STATE_READY) {
+    	if ((HAL_GetTick() - t0) > 5U) {
+			/* Onceki gonderim takildi - iptal et ve bu cevrimi atla.
+			 * 50 Hz'de yeniden denenecek. */
+			HAL_UART_AbortTransmit(UART2_huartx);
+			return;
+		}
+    }
 
     // 2. Gönderilecek veriyi TX buffer'ına kopyala (Şu an Cache'de)
     memcpy(uart2_tx_buffer, data, length);

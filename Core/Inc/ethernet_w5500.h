@@ -43,12 +43,19 @@ enum Connection_Socket
 
 extern bool eth_connection_state[];
 
+typedef enum {
+    ETH_OK = 0,
+    ETH_ERR_NO_CHIP,
+    ETH_ERR_SPI
+} Eth_Status_t;
+
+extern volatile Eth_Status_t eth_status;
 /* ===================================================================== */
 /* KÜTÜPHANE FONKSİYONLARI                                               */
 /* ===================================================================== */
 
 // Donanım Başlatma
-void Ethernet_Init(SPI_HandleTypeDef *spi);
+Eth_Status_t Ethernet_Init(SPI_HandleTypeDef *spi);
 bool Ethernet_Check_Link_Status(void);
 
 // TCP Fonksiyonları

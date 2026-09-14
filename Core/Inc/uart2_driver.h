@@ -61,7 +61,7 @@ typedef struct {
 #pragma pack(pop)
 
 // Fonksiyon Prototipleri
-void UART2_Init(UART_HandleTypeDef *huartx);
+bool UART2_Init(UART_HandleTypeDef *huartx);
 void UART2_Send_Data(uint8_t *data, uint16_t length);
 
 // Kesme (Callback) Yönlendiricileri

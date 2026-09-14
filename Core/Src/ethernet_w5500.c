@@ -17,6 +17,9 @@ uint16_t temp_port = 0;
 uint8_t *spi_dma_tx_buf = (uint8_t *)0x30000000;
 uint8_t *spi_dma_rx_buf = (uint8_t *)0x30000800;
 #define DMA_BUF_SIZE 2048
+#define SPI_BURST_TIMEOUT_MS  20U
+
+volatile Eth_Status_t eth_status = ETH_ERR_NO_CHIP;
 
 // SPI Callback Fonksiyonları
 static void cs_sel() { HAL_GPIO_WritePin(ETH_SCSn_GPIO_Port, ETH_SCSn_Pin, GPIO_PIN_RESET); }
@@ -25,23 +28,49 @@ static uint8_t spi_rb(void) { uint8_t rbuf; HAL_SPI_Receive(Hspi, &rbuf, 1, 100)
 static void spi_wb(uint8_t b) { HAL_SPI_Transmit(Hspi, &b, 1, 100); }
 
 static void spi_wb_burst(uint8_t* pBuf, uint16_t len) {
-    if(len > DMA_BUF_SIZE) len = DMA_BUF_SIZE;
-    memcpy(spi_dma_tx_buf, pBuf, len);
-    HAL_SPI_Transmit_DMA(Hspi, spi_dma_tx_buf, len);
-    while(HAL_SPI_GetState(Hspi) != HAL_SPI_STATE_READY);
+	if (len > DMA_BUF_SIZE) len = DMA_BUF_SIZE;
+	memcpy(spi_dma_tx_buf, pBuf, len);
+
+	if (HAL_SPI_Transmit_DMA(Hspi, spi_dma_tx_buf, len) != HAL_OK) {
+		eth_status = ETH_ERR_SPI;
+		return;
+	}
+
+	uint32_t t0 = HAL_GetTick();
+	while (HAL_SPI_GetState(Hspi) != HAL_SPI_STATE_READY)
+	{
+		if ((HAL_GetTick() - t0) > SPI_BURST_TIMEOUT_MS) {
+			HAL_SPI_Abort(Hspi);
+			eth_status = ETH_ERR_SPI;
+			return;
+		}
+	}
 }
 
 static void spi_rb_burst(uint8_t* pBuf, uint16_t len) {
     if(len > DMA_BUF_SIZE) len = DMA_BUF_SIZE;
-    HAL_SPI_Receive_DMA(Hspi, spi_dma_rx_buf, len);
-    while(HAL_SPI_GetState(Hspi) != HAL_SPI_STATE_READY);
+
+    if(HAL_SPI_Receive_DMA(Hspi, spi_dma_rx_buf, len) != HAL_OK) {
+    	eth_status = ETH_ERR_SPI;
+		return;
+    }
+
+    uint32_t t0 = HAL_GetTick();
+    while(HAL_SPI_GetState(Hspi) != HAL_SPI_STATE_READY)
+    {
+    	if ((HAL_GetTick() - t0) > SPI_BURST_TIMEOUT_MS) {
+			HAL_SPI_Abort(Hspi);
+			eth_status = ETH_ERR_SPI;
+			return;
+		}
+    }
     memcpy(pBuf, spi_dma_rx_buf, len);
 }
 
 /* ===================================================================== */
 /* 1. DONANIM BAŞLATMA                                                   */
 /* ===================================================================== */
-void Ethernet_Init(SPI_HandleTypeDef *spi)
+Eth_Status_t  Ethernet_Init(SPI_HandleTypeDef *spi)
 {
     Hspi = spi;
     HAL_GPIO_WritePin(ETH_PMODE0_GPIO_Port, ETH_PMODE0_Pin, GPIO_PIN_SET);
@@ -58,23 +87,26 @@ void Ethernet_Init(SPI_HandleTypeDef *spi)
     reg_wizchip_spiburst_cbfunc(spi_rb_burst, spi_wb_burst);
     HAL_Delay(300);
 
-    if(wizchip_init(ARM_bufSize, ARM_bufSize) == 0)
+    if(wizchip_init(ARM_bufSize, ARM_bufSize) != 0)
     {
-        wiz_NetInfo netInfo = {
-            .mac  = STM32_MAC_ADDR,
-            .ip   = STM32_IP_ADDR,
-            .sn   = STM32_SUBNET,
-            .gw   = STM32_GATEWAY
-        };
-        wizchip_setnetinfo(&netInfo);
-        HAL_Delay(10);
-
-        wiz_NetTimeout eth_timeout = { .retry_cnt = 1, .time_100us = 100 };
-        wizchip_setnetmode(NM_FORCEARP);
-        wizchip_settimeout(&eth_timeout);
-        HAL_Delay(100);
+    	eth_status = ETH_ERR_NO_CHIP; // etherneth başlatılamadı
+		return eth_status;
     }
-    else { while(1); } // Çip bulunamazsa kilitlen
+    wiz_NetInfo netInfo = {
+		.mac  = STM32_MAC_ADDR,
+		.ip   = STM32_IP_ADDR,
+		.sn   = STM32_SUBNET,
+		.gw   = STM32_GATEWAY
+	};
+	wizchip_setnetinfo(&netInfo);
+	HAL_Delay(10);
+
+	wiz_NetTimeout eth_timeout = { .retry_cnt = 1, .time_100us = 100 };
+	wizchip_setnetmode(NM_FORCEARP);
+	wizchip_settimeout(&eth_timeout);
+	HAL_Delay(100);
+	eth_status = ETH_OK;
+	return eth_status;
 }
 
 /* ===================================================================== */

@@ -80,6 +80,8 @@ FDCAN_HandleTypeDef hfdcan2;
 
 I2C_HandleTypeDef hi2c1;
 
+IWDG_HandleTypeDef hiwdg1;
+
 LTDC_HandleTypeDef hltdc;
 
 RTC_HandleTypeDef hrtc;
@@ -100,6 +102,10 @@ DMA_HandleTypeDef hdma_usart2_tx;
 SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
+
+/* Backup SRAM veya RTC backup register'a yazilabilir; simdilik
+   noinit bir degisken yeterli. */
+__attribute__((section(".noinit"))) volatile uint32_t g_fault_marker;
 
 uint8_t udp_rx_buffer[100]; // Hedef 1'den (UDP) gelenler buraya düşecek
 uint8_t tcp_rx_buffer[100]; // Hedef 2'den (TCP) gelenler buraya düşecek
@@ -172,6 +178,7 @@ static void MX_FDCAN2_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_RTC_Init(void);
+static void MX_IWDG1_Init(void);
 /* USER CODE BEGIN PFP */
 
 uint8_t SDRAM_Health_Test(void)
@@ -248,6 +255,16 @@ int main(void)
 
   /* USER CODE BEGIN SysInit */
 
+  /*-- DEBUGDA IWDG RESET ATMASIN DİYE --*/
+#ifdef DEBUG
+    // Doğrudan debug ayarlarını çağırabilirsiniz
+    HAL_DBGMCU_EnableDBGSleepMode();
+    HAL_DBGMCU_EnableDBGStopMode();
+
+    // Watchdog 1'i breakpoint'lerde dondur
+    __HAL_DBGMCU_FREEZE_IWDG1();
+#endif
+
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -265,6 +282,7 @@ int main(void)
   MX_I2C1_Init();
   MX_TIM4_Init();
   MX_RTC_Init();
+
   MX_TouchGFX_Init();
   /* USER CODE BEGIN 2 */
 
@@ -276,8 +294,13 @@ int main(void)
   TIM4->CCR1 = 60;
 
   /*-- Ethernet W5500 --*/
-  Ethernet_Init(&hspi4);
-  UDP_Socket_Init(TARGET_1_SOCKET, TARGET_1_PORT);
+  if (Ethernet_Init(&hspi4) == ETH_OK) {
+      UDP_Socket_Init(TARGET_1_SOCKET, TARGET_1_PORT);
+  }
+  else {
+	  /* ETH_OK degilse sistem calismaya devam eder; ekranda
+	     "TLUS BAGLANTI YOK" gosterilir. */
+  }
 
   /*-- Button Shift Register --*/
   HC165_Init();
@@ -289,7 +312,10 @@ int main(void)
   RS422_Init(&huart1);
 
   /*-- UART2 BMB Driver--*/
-  UART2_Init(&huart2);
+  if(UART2_Init(&huart2) == false)
+  {
+	  // ekranda uart bağlantısının olmadığını söyle
+  }
 
   /*-- CAN Logs --*/
   CAN_Logger_Init(&hfdcan2);
@@ -314,7 +340,7 @@ int main(void)
   task_time_buttons = HAL_GetTick();
   task_time_bmb_uart = HAL_GetTick();
 
-
+  MX_IWDG1_Init();
 
   /* USER CODE END 2 */
 
@@ -322,6 +348,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  HAL_IWDG_Refresh(&hiwdg1);
     /* USER CODE END WHILE */
 
   MX_TouchGFX_Process();
@@ -687,6 +714,35 @@ static void MX_I2C1_Init(void)
   /* USER CODE BEGIN I2C1_Init 2 */
 
   /* USER CODE END I2C1_Init 2 */
+
+}
+
+/**
+  * @brief IWDG1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_IWDG1_Init(void)
+{
+
+  /* USER CODE BEGIN IWDG1_Init 0 */
+
+  /* USER CODE END IWDG1_Init 0 */
+
+  /* USER CODE BEGIN IWDG1_Init 1 */
+
+  /* USER CODE END IWDG1_Init 1 */
+  hiwdg1.Instance = IWDG1;
+  hiwdg1.Init.Prescaler = IWDG_PRESCALER_32;
+  hiwdg1.Init.Window = 4095;
+  hiwdg1.Init.Reload = 499;
+  if (HAL_IWDG_Init(&hiwdg1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN IWDG1_Init 2 */
+
+  /* USER CODE END IWDG1_Init 2 */
 
 }
 
@@ -1435,7 +1491,7 @@ void Debug_Data_Injector(void)
 		buf[5] = 0x00;
 
 		// =======================================================
-		// İŞLEMCİ BİRİMİ HATALARI (Byte 6-11)
+		// İ�?LEMCİ BİRİMİ HATALARI (Byte 6-11)
 		// =======================================================
 		buf[6]  = (dbg_sys_proc_faults[0] >> 8) & 0xFF;
 		buf[7]  = dbg_sys_proc_faults[0] & 0xFF;
@@ -1517,10 +1573,13 @@ void MPU_Config(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
+	g_fault_marker = 0xDEADBEEFU;
+	    /* __disable_irq() YOK - watchdog'un calismasina izin ver */
   /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
+ // __disable_irq();
   while (1)
   {
+	  /* IWDG beslenmiyor -> ~500 ms icinde reset */
   }
   /* USER CODE END Error_Handler_Debug */
 }
