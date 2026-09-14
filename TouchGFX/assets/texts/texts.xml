@@ -1,0 +1,858 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextDatabase xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="texts.xsd" Version="4.23.0">
+  <Languages>
+    <Language Id="GB" />
+    <Language Id="ENG" />
+  </Languages>
+  <Texts>
+    <TextGroup Id="Unsorted">
+      <Text Id="LOG_SEND_GVD_INFO" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">GVD BİLGİSİ İSTENDİ </Translation>
+        <Translation Language="ENG">MDF INFORMATION REQUESTED</Translation>
+      </Text>
+      <Text Id="LOG_SEND_GVD_SELECT" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">GVD SEÇİMİ GÖNDERİLDİ</Translation>
+        <Translation Language="ENG">MDF SELECTION SENT</Translation>
+      </Text>
+      <Text Id="LOG_MOD_CHNGE" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">MOD DEĞİŞTİR GÖNDERİLDİ</Translation>
+        <Translation Language="ENG">MODE CHANGE SENT</Translation>
+      </Text>
+      <Text Id="LOG_ZEROIZE" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">ZEROIZE</Translation>
+        <Translation Language="ENG">ZEROIZE</Translation>
+      </Text>
+      <Text Id="LOG_SOFT_RESET" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SOFT RESET</Translation>
+        <Translation Language="ENG">SOFT RESET</Translation>
+      </Text>
+      <Text Id="LOG_SYSTEM_BOOT" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SİSTEM BAŞLATILDI</Translation>
+        <Translation Language="ENG">SYSTEM STARTED</Translation>
+      </Text>
+      <Text Id="WARNBLASTFAIL_FRAG" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">ATIŞ BAŞARISIZ (TAHRİP) - %d</Translation>
+        <Translation Language="ENG">FIRING FAILED (FRAGMENTATION) - %d</Translation>
+      </Text>
+      <Text Id="WARNBLASTFAIL_SMOKE" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">ATIŞ BAŞARISIZ (SİS) - %d</Translation>
+        <Translation Language="ENG">FIRING FAILED (SMOKE) - %d</Translation>
+      </Text>
+      <Text Id="WARNMISFIRE_FRAG" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">ATIŞ GERÇEKLEŞMEDİ (TAHRİP) - %d</Translation>
+        <Translation Language="ENG">FIRING FAILED (FRAGMENTATION) - %d</Translation>
+      </Text>
+      <Text Id="WARNMISFIRE_SMOKE" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">ATIŞ GERÇEKLEŞMEDİ (SİS) - %d</Translation>
+        <Translation Language="ENG">FIRING FAILED (SMOKE) - %d</Translation>
+      </Text>
+      <Text Id="WARNSUCCESS_FRAG" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">ATIŞ BAŞARILI (TAHRİP) - %d</Translation>
+        <Translation Language="ENG">FIRING SUCCESSFUL (FRAGMENTATION) - %d</Translation>
+      </Text>
+      <Text Id="WARNSUCCESS_SMOKE" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">ATIŞ BAŞARILI (SİS) - %d</Translation>
+        <Translation Language="ENG">FIRING SUCCESSFUL (SMOKE) - %d</Translation>
+      </Text>
+      <Text Id="LOG_FAULT_CLEARED" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">ARIZA GİDERİLDİ: %d</Translation>
+        <Translation Language="ENG">FAULT CLEARED: %d</Translation>
+      </Text>
+      <Text Id="LOG_CLEAR_ALL" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">TÜM ARIZALAR SİLİNDİ</Translation>
+        <Translation Language="ENG">ALL FAULTS CLEARED</Translation>
+      </Text>
+      <Text Id="LOG_FIRE_BTN" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">%d NOLU BUTON İLE ATIŞ YAPILDI</Translation>
+        <Translation Language="ENG">FIRED USING BUTTON NO. %d</Translation>
+      </Text>
+      <Text Id="LOG_AMMO_FRAG" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">TAHRİP MÜHİMMATI SEÇİLDİ</Translation>
+        <Translation Language="ENG">FRAGMENTATION AMMUNITION SELECTED</Translation>
+      </Text>
+      <Text Id="LOG_AMMO_SMOKE" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SİS MÜHİMMATI SEÇİLDİ</Translation>
+        <Translation Language="ENG">SMOKE AMMUNITION SELECTED</Translation>
+      </Text>
+      <Text Id="LOG_SYS_LOCKED" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">ATIŞ KİLİDİ KAPATILDI</Translation>
+        <Translation Language="ENG">FIRING LOCK ENGAGED</Translation>
+      </Text>
+      <Text Id="LOG_SYS_ARMED" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">ATIŞ KİLİDİ AÇILDI</Translation>
+        <Translation Language="ENG">FIRING LOCK RELEASED</Translation>
+      </Text>
+      <Text Id="__SingleUse_4ISW" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">New Text</Translation>
+        <Translation Language="ENG">00:00:00</Translation>
+      </Text>
+      <Text Id="__SingleUse_PH5A" Alignment="Center" TypographyId="RadarFont">
+        <Translation Language="GB">&lt;value&gt;</Translation>
+        <Translation Language="ENG">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="__SingleUse_NKWH" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">New Text</Translation>
+        <Translation Language="ENG">New Text</Translation>
+      </Text>
+      <Text Id="__SingleUse_2H9A" Alignment="Center" TypographyId="RadarFont">
+        <Translation Language="GB">&lt;value&gt;</Translation>
+        <Translation Language="ENG">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="FLT_SENS_TEMP_SNS" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SENSÖR %d - SICAKLIK SENSÖRÜ ARIZASI</Translation>
+        <Translation Language="ENG">SENSOR %d - TEMP SENSOR FAULT</Translation>
+      </Text>
+      <Text Id="FLT_SENS_TEMP_LIM" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SENSÖR %d - YÜKSEK SICAKLIK ARIZASI</Translation>
+        <Translation Language="ENG">SENSOR %d - HIGH TEMP FAULT</Translation>
+      </Text>
+      <Text Id="FLT_SENS_PWR" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SENSÖR %d - ANA BESLEME ARIZASI</Translation>
+        <Translation Language="ENG">SENSOR %d - MAIN POWER FAULT</Translation>
+      </Text>
+      <Text Id="FLT_SENS_VN3_7" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SENSÖR %d - NEG 3.7V VOLTAJ ARIZASI</Translation>
+        <Translation Language="ENG">SENSOR %d - NEG 3.7V VOLTAGE FAULT</Translation>
+      </Text>
+      <Text Id="FLT_SENS_VN7_4" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SENSÖR %d - NEG 7.4V VOLTAJ ARIZASI</Translation>
+        <Translation Language="ENG">SENSOR %d - NEG 7.4V VOLTAGE FAULT</Translation>
+      </Text>
+      <Text Id="FLT_SENS_V80" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SENSÖR %d - 80V VOLTAJ ARIZASI</Translation>
+        <Translation Language="ENG">SENSOR %d - 80V VOLTAGE FAULT</Translation>
+      </Text>
+      <Text Id="FLT_SENS_V16" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SENSÖR %d - 16V VOLTAJ ARIZASI</Translation>
+        <Translation Language="ENG">SENSOR %d - 16V VOLTAGE FAULT</Translation>
+      </Text>
+      <Text Id="FLT_SENS_V7_4" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SENSÖR %d - 7.4V VOLTAJ ARIZASI</Translation>
+        <Translation Language="ENG">SENSOR %d - 7.4V VOLTAGE FAULT</Translation>
+      </Text>
+      <Text Id="FLT_SENS_V3_7" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SENSÖR %d - 3.7V VOLTAJ ARIZASI</Translation>
+        <Translation Language="ENG">SENSOR %d - 3.7V VOLTAGE FAULT</Translation>
+      </Text>
+      <Text Id="FLT_SENS_PRESS" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SENSÖR %d - BASINÇ ARIZASI</Translation>
+        <Translation Language="ENG">SENSOR %d - PRESSURE FAULT</Translation>
+      </Text>
+      <Text Id="FLT_SENS_PWR_SER" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SENSÖR %d - GÜÇ KARTI SERİ KANAL ARIZASI</Translation>
+        <Translation Language="ENG">SENSOR %d - PWR CARD SERIAL FAULT</Translation>
+      </Text>
+      <Text Id="FLT_SENS_SHUTDOWN" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SENSÖR %d - KONTROLLÜ KAPANMA</Translation>
+        <Translation Language="ENG">SENSOR %d - CONTROLLED SHUTDOWN</Translation>
+      </Text>
+      <Text Id="FLT_SENS_CTRL" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SENSÖR %d - KONTROL KARTI ARIZASI</Translation>
+        <Translation Language="ENG">SENSOR %d - CONTROL CARD FAULT</Translation>
+      </Text>
+      <Text Id="FLT_SENS_B3_2" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SENSÖR %d - BANT III SENSÖR (2) ARIZASI</Translation>
+        <Translation Language="ENG">SENSOR %d - BAND III SENSOR (2) FAULT</Translation>
+      </Text>
+      <Text Id="FLT_SENS_B3_1" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SENSÖR %d - BANT III SENSÖR (1) ARIZASI</Translation>
+        <Translation Language="ENG">SENSOR %d - BAND III SENSOR (1) FAULT</Translation>
+      </Text>
+      <Text Id="FLT_SENS_B3_0" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SENSÖR %d - BANT III SENSÖR (0) ARIZASI</Translation>
+        <Translation Language="ENG">SENSOR %d - BAND III SENSOR (0) FAULT</Translation>
+      </Text>
+      <Text Id="FLT_SENS_B12" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SENSÖR %d - BANT I/II KARTI ARIZASI</Translation>
+        <Translation Language="ENG">SENSOR %d - BAND I/II CARD FAULT</Translation>
+      </Text>
+      <Text Id="FLT_PROC_TEMP" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">İŞLEMCİ BİRİMİ YÜKSEK SICAKLIK ARIZASI</Translation>
+        <Translation Language="ENG">PROCESSOR UNIT HIGH TEMP FAULT</Translation>
+      </Text>
+      <Text Id="FLT_PROC_PWR_SER" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">İŞLEMCİ BİRİMİ GÜÇ KARTI SERİ KANAL ARIZASI</Translation>
+        <Translation Language="ENG">PROCESSOR UNIT PWR CARD SERIAL FAULT</Translation>
+      </Text>
+      <Text Id="FLT_PROC_SHUTDOWN" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">İŞLEMCİ KAPANMA (YÜKSEK SICAKLIK)</Translation>
+        <Translation Language="ENG">PROCESSOR SHUTDOWN (HIGH TEMP)</Translation>
+      </Text>
+      <Text Id="FLT_PROC_PWR" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">İŞLEMCİ BİRİMİ ANA BESLEME ARIZASI</Translation>
+        <Translation Language="ENG">PROCESSOR UNIT MAIN POWER FAULT</Translation>
+      </Text>
+      <Text Id="FLT_PROC_IFACE" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">İŞLEMCİ BİRİMİ ARAYÜZ KARTI ARIZASI</Translation>
+        <Translation Language="ENG">PROCESSOR UNIT INTERFACE CARD FAULT</Translation>
+      </Text>
+      <Text Id="FLT_PROC_SER4" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">İŞLEMCİ BİRİMİ SERİ KANAL 4 ARIZASI</Translation>
+        <Translation Language="ENG">PROCESSOR UNIT SERIAL CH 4 FAULT</Translation>
+      </Text>
+      <Text Id="FLT_PROC_SER3" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">İŞLEMCİ BİRİMİ SERİ KANAL 3 ARIZASI</Translation>
+        <Translation Language="ENG">PROCESSOR UNIT SERIAL CH 3 FAULT</Translation>
+      </Text>
+      <Text Id="FLT_PROC_SER2" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">İŞLEMCİ BİRİMİ SERİ KANAL 2 ARIZASI</Translation>
+        <Translation Language="ENG">PROCESSOR UNIT SERIAL CH 2 FAULT</Translation>
+      </Text>
+      <Text Id="FLT_PROC_SER1" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">İŞLEMCİ BİRİMİ SERİ KANAL 1 ARIZASI</Translation>
+        <Translation Language="ENG">PROCESSOR UNIT SERIAL CH 1 FAULT</Translation>
+      </Text>
+      <Text Id="FLT_PROC_MEMFULL" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">İŞLEMCİ BİRİMİ BELLEK DOLU</Translation>
+        <Translation Language="ENG">PROCESSOR UNIT MEMORY FULL</Translation>
+      </Text>
+      <Text Id="FLT_PROC_NVSRAM" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">İŞLEMCİ BİRİMİ NVSRAM ARIZASI</Translation>
+        <Translation Language="ENG">PROCESSOR UNIT NVSRAM FAULT</Translation>
+      </Text>
+      <Text Id="FLT_PROC_MEMFILE" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">İŞLEMCİ BİRİMİ BELLEK DOSYASI ARIZASI</Translation>
+        <Translation Language="ENG">PROCESSOR UNIT MEM FILE FAULT</Translation>
+      </Text>
+      <Text Id="FLT_PROC_NVRAM" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">İŞLEMCİ BİRİMİ KALICI BELLEK ARIZASI</Translation>
+        <Translation Language="ENG">PROCESSOR UNIT NVRAM FAULT</Translation>
+      </Text>
+      <Text Id="FLT_PROC_RAM" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">İŞLEMCİ BİRİMİ RAM ARIZASI</Translation>
+        <Translation Language="ENG">PROCESSOR UNIT RAM FAULT</Translation>
+      </Text>
+      <Text Id="soft_reset_popup" Alignment="Center" TypographyId="SmallBold">
+        <Translation Language="GB">DİKKAT! SİSTEM RESETLENİCEK.&#10;&#10;Onaylamak için ENTER tuşuna 3 saniye basılı tutun</Translation>
+        <Translation Language="ENG">WARNING! THE SYSTEM WILL BE RESET.&#10;&#10;Press and hold the ENTER key for 3 seconds to confirm.</Translation>
+      </Text>
+      <Text Id="emergencyPopupText" Alignment="Center" TypographyId="SmallBold">
+        <Translation Language="GB">DİKKAT! TÜM VERİLER SİLİNECEK.&#10;&#10;Onaylamak için ENTER tuşuna 3 saniye basılı tutun</Translation>
+        <Translation Language="ENG">WARNING! ALL DATA WILL BE DELETED.&#10;&#10;Press and hold the ENTER key for 3 seconds to confirm.</Translation>
+      </Text>
+      <Text Id="soft_reset_main" Alignment="Center" TypographyId="mediumBold">
+        <Translation Language="GB">Resetlemek İçin ENTER Tuşuna Basın</Translation>
+        <Translation Language="ENG">Press ENTER &#10;For An &#10;Soft Reset.</Translation>
+      </Text>
+      <Text Id="zeroizeText" Alignment="Center" TypographyId="mediumBold">
+        <Translation Language="GB" Alignment="Center">Acil Sıfırlama İçin ENTER Tuşuna Basın</Translation>
+        <Translation Language="ENG" Alignment="Center">Press ENTER &#10;For An &#10;Emergency Reset.</Translation>
+      </Text>
+      <Text Id="zeroize" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">ACİL SIFIRLA</Translation>
+        <Translation Language="ENG">ZEROIZE</Translation>
+      </Text>
+      <Text Id="soft_Reset_header" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">RESET</Translation>
+        <Translation Language="ENG">SOFT RESET</Translation>
+      </Text>
+      <Text Id="__SingleUse_5ODV" Alignment="Left" TypographyId="SmallExtraBold">
+        <Translation Language="GB">New Text</Translation>
+        <Translation Language="ENG">99</Translation>
+      </Text>
+      <Text Id="__SingleUse_02Z1" Alignment="Center" TypographyId="SmallExtraBold">
+        <Translation Language="GB">New Text&lt;value&gt;</Translation>
+        <Translation Language="ENG">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="__SingleUse_1YD0" Alignment="Left" TypographyId="SmallBold">
+        <Translation Language="GB">New Text</Translation>
+        <Translation Language="ENG">08:45</Translation>
+      </Text>
+      <Text Id="__SingleUse_LD18" Alignment="Left" TypographyId="SmallExtra">
+        <Translation Language="GB">New Text</Translation>
+        <Translation Language="ENG">26.08.2026</Translation>
+      </Text>
+      <Text Id="__SingleUse_X1ML" Alignment="Center" TypographyId="SmallExtra">
+        <Translation Language="GB">New Text&lt;value&gt;</Translation>
+        <Translation Language="ENG">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="__SingleUse_EFG1" Alignment="Center" TypographyId="SmallBold">
+        <Translation Language="GB">New Text&lt;value&gt;</Translation>
+        <Translation Language="ENG">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="__SingleUse_YS6P" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">360</Translation>
+        <Translation Language="ENG">2</Translation>
+      </Text>
+      <Text Id="PRIONUM" Alignment="Center" TypographyId="RadarFont">
+        <Translation Language="GB">&lt;value&gt;°</Translation>
+        <Translation Language="ENG">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="__SingleUse_ZR96" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">New Text</Translation>
+        <Translation Language="ENG">New Text</Translation>
+      </Text>
+      <Text Id="__SingleUse_AIGZ" Alignment="Center" TypographyId="RadarFont">
+        <Translation Language="GB">New Text&lt;value&gt;</Translation>
+        <Translation Language="ENG">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="RADAR_SMOKE_ERR" Alignment="Center" TypographyId="RadarFont">
+        <Translation Language="GB" Alignment="Center">YUVA &lt;value&gt; - SİS MÜHİMMAT ARIZASI</Translation>
+        <Translation Language="ENG" Alignment="Center">SLOT &lt;value&gt; - SMOKE AMMO FAULT</Translation>
+      </Text>
+      <Text Id="RADAR_FRAG_ERR" Alignment="Center" TypographyId="RadarFont">
+        <Translation Language="GB" Alignment="Center">YUVA &lt;value&gt; - TAHRİP MÜHİMMAT ARIZASI</Translation>
+        <Translation Language="ENG" Alignment="Center">SLOT &lt;value&gt; - FRAG AMMO FAULT</Translation>
+      </Text>
+      <Text Id="RADAR_HW_ERR" Alignment="Center" TypographyId="RadarFont">
+        <Translation Language="GB" Alignment="Center">DONANIM VEYA VOLTAJ ARIZASI</Translation>
+        <Translation Language="ENG" Alignment="Center">HARDWARE OR VOLTAGE FAULT</Translation>
+      </Text>
+      <Text Id="RADAR_COMM_LOST" Alignment="Center" TypographyId="RadarFont">
+        <Translation Language="GB" Alignment="Center">İLETİŞİM KOPTU (KABLO HATASI)</Translation>
+        <Translation Language="ENG" Alignment="Center">COMM LOST (CABLE ERROR)</Translation>
+      </Text>
+      <Text Id="faultclearall" Alignment="Left" TypographyId="medium">
+        <Translation Language="GB">[ TÜM ARIZALARI SİL ]</Translation>
+        <Translation Language="ENG">[ CLEAR ALL FAULTS ]</Translation>
+      </Text>
+      <Text Id="faulthwerr" Alignment="Left" TypographyId="medium">
+        <Translation Language="GB">DONANIM VEYA VOLTAJ ARIZASI</Translation>
+        <Translation Language="ENG">HARDWARE OR VOLTAGE FAULT</Translation>
+      </Text>
+      <Text Id="faultcommlost" Alignment="Left" TypographyId="medium">
+        <Translation Language="GB">İLETİŞİM KOPTU (KABLO HATASI)</Translation>
+        <Translation Language="ENG">COMM LOST (CABLE ERROR)</Translation>
+      </Text>
+      <Text Id="faultsmoke" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">YUVA %d - SİS MÜHİMMAT ARIZASI</Translation>
+        <Translation Language="ENG">SLOT %d - SMOKE AMMO FAULT</Translation>
+      </Text>
+      <Text Id="faultfrag" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">YUVA %d - TAHRİP MÜHİMMAT ARIZASI</Translation>
+        <Translation Language="ENG">SLOT %d - FRAG AMMO FAULT</Translation>
+      </Text>
+      <Text Id="PRIORITY_BADGE" Alignment="Left" TypographyId="SmallExtra">
+        <Translation Language="GB">%d</Translation>
+        <Translation Language="ENG">%d</Translation>
+      </Text>
+      <Text Id="THREAT_None" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">---</Translation>
+        <Translation Language="ENG">---</Translation>
+      </Text>
+      <Text Id="THREAT_SRCH" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">SRCH</Translation>
+        <Translation Language="ENG">SRCH</Translation>
+      </Text>
+      <Text Id="THREAT_LBR" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">LBR</Translation>
+        <Translation Language="ENG">LBR</Translation>
+      </Text>
+      <Text Id="THREAT_LD" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">LD</Translation>
+        <Translation Language="ENG">LD</Translation>
+      </Text>
+      <Text Id="THREAT_LRF" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">LRF</Translation>
+        <Translation Language="ENG">LRF</Translation>
+      </Text>
+      <Text Id="warnrr" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">SAG ARKA TÜP</Translation>
+        <Translation Language="ENG">REAR RIGHT TUBE</Translation>
+      </Text>
+      <Text Id="warnfr" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">SAG ON TÜP</Translation>
+        <Translation Language="ENG">FRONT RIGHT TUBE</Translation>
+      </Text>
+      <Text Id="warnrl" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">SOL ARKA TÜP</Translation>
+        <Translation Language="ENG">REAR LEFT TUBE</Translation>
+      </Text>
+      <Text Id="warnfl" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">SOL ON TÜP</Translation>
+        <Translation Language="ENG">FRONT LEFT TUBE</Translation>
+      </Text>
+      <Text Id="__SingleUse_A9UK" Alignment="Center" TypographyId="Small">
+        <Translation Language="GB">Çıkmak için (GERİ / BACK) tuşuna basın.</Translation>
+        <Translation Language="ENG">Press (BACK) button to exit.</Translation>
+      </Text>
+      <Text Id="swsmoke" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Şalter Durumu:&#10;&#10;[ SİS SEÇİLİ (SMOKE) ]</Translation>
+        <Translation Language="ENG">Switch State:&#10;&#10;[ SMOKE SELECTED ]</Translation>
+      </Text>
+      <Text Id="swfrag" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Şalter Durumu:&#10;&#10;[ TAHRİP SEÇİLİ (FRAG) ]</Translation>
+        <Translation Language="ENG">Switch State:&#10;&#10;[ FRAG SELECTED ]</Translation>
+      </Text>
+      <Text Id="swneutral" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Şalter Durumu:&#10;&#10;[ MÜHİMMAT NÖTR ]</Translation>
+        <Translation Language="ENG">Switch State:&#10;&#10;[ AMMO NEUTRAL ]</Translation>
+      </Text>
+      <Text Id="swarmed" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Şalter Durumu:&#10;&#10;[ SİSTEM AÇIK (ARMED) ]</Translation>
+        <Translation Language="ENG">Switch State:&#10;&#10;[ ARMED ]</Translation>
+      </Text>
+      <Text Id="swdisarmed" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Şalter Durumu:&#10;&#10;[ SİSTEM KAPALI (DISARM) ]</Translation>
+        <Translation Language="ENG">Switch State:&#10;&#10;[ DISARMED ]</Translation>
+      </Text>
+      <Text Id="btnenter" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Şu an basılan:&#10;&#10;[ GİRİŞ (ENTER) ]</Translation>
+        <Translation Language="ENG">Currently pressed:&#10;&#10;[ ENTER ]</Translation>
+      </Text>
+      <Text Id="btndown" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Şu an basılan:&#10;&#10;[ AŞAĞI OK ]</Translation>
+        <Translation Language="ENG">Currently pressed:&#10;&#10;[ DOWN ARROW ]</Translation>
+      </Text>
+      <Text Id="btnup" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Şu an basılan:&#10;&#10;[ YUKARI OK</Translation>
+        <Translation Language="ENG">Currently pressed:&#10;&#10;[ UP ARROW ]</Translation>
+      </Text>
+      <Text Id="btnsalvo" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Şu an basılan:&#10;&#10;[ TÜMÜNÜ ATEŞLE (SALVO) ]</Translation>
+        <Translation Language="ENG">Currently pressed:&#10;&#10;[ FIRE ALL (SALVO) ]</Translation>
+      </Text>
+      <Text Id="btnrearright" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Şu an basılan:&#10;&#10;[ SAĞ ARKA ATIŞ ]</Translation>
+        <Translation Language="ENG">Currently pressed:&#10;&#10;[ REAR RIGHT FIRE ]</Translation>
+      </Text>
+      <Text Id="btnrearleft" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Şu an basılan:&#10;&#10;[ SOL ARKA ATIŞ ]</Translation>
+        <Translation Language="ENG">Currently pressed:&#10;&#10;[ REAR LEFT FIRE ]</Translation>
+      </Text>
+      <Text Id="btnfrntright" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Şu an basılan:&#10;&#10;[ SAĞ ÖN ATIŞ ]</Translation>
+        <Translation Language="ENG">Currently pressed:&#10;&#10;[ FRONT RIGHT FIRE ]</Translation>
+      </Text>
+      <Text Id="btnfrntleft" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Şu an basılan:&#10;&#10;[ SOL ÖN ATIŞ ]</Translation>
+        <Translation Language="ENG">Currently pressed:&#10;&#10;[ FRONT LEFT FIRE ]</Translation>
+      </Text>
+      <Text Id="btnblackout" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Şu an basılan:&#10;&#10;[ KARARTMA (BLACKOUT) ]</Translation>
+        <Translation Language="ENG">Currently pressed:&#10;&#10;[ BLACKOUT ]</Translation>
+      </Text>
+      <Text Id="btnsmoke" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Şu an basılan:&#10;&#10;[ SİS HAVANI (SMOKE) ]</Translation>
+        <Translation Language="ENG">Currently pressed:&#10;&#10;[ SMOKE ]</Translation>
+      </Text>
+      <Text Id="btnmenu" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Şu an basılan:&#10;&#10;[ MENÜ ]</Translation>
+        <Translation Language="ENG">Currently pressed:&#10;&#10;[ MENU ]</Translation>
+      </Text>
+      <Text Id="btnhome" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Şu an basılan:&#10;&#10;[ ANA EKRAN (HOME) ]</Translation>
+        <Translation Language="ENG">Currently pressed:&#10;&#10;[ HOME ]</Translation>
+      </Text>
+      <Text Id="btnwaiting" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Lütfen test etmek istediğiniz&#10;tuşa veya şaltere basın.&#10;&#10;Bekleniyor...</Translation>
+        <Translation Language="ENG">Please press a button&#10;or switch to test.&#10;&#10;Waiting...</Translation>
+      </Text>
+      <Text Id="popupsessilence" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Ses Testi Çalışıyor...&#10;&#10;[ SESSİZLİK ]</Translation>
+        <Translation Language="ENG">Audio Test Running...&#10;&#10;[ SILENCE ]</Translation>
+      </Text>
+      <Text Id="popupseshigh" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Ses Testi Çalışıyor...&#10;&#10;Şu anki: YÜKSEK SEVİYE</Translation>
+        <Translation Language="ENG">Audio Test Running...&#10;&#10;Current: HIGH LEVEL</Translation>
+      </Text>
+      <Text Id="popupsesmid" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Ses Testi Çalışıyor...&#10;&#10;Şu anki: ORTA SEVİYE</Translation>
+        <Translation Language="ENG">Audio Test Running...&#10;&#10;Current: MEDIUM LEVEL</Translation>
+      </Text>
+      <Text Id="popupseslow" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Ses Testi Çalışıyor...&#10;&#10;Şu anki: DÜŞÜK SEVİYE</Translation>
+        <Translation Language="ENG">Audio Test Running...&#10;&#10;Current: LOW LEVEL</Translation>
+      </Text>
+      <Text Id="popupsesstart" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Test Başlıyor...&#10;&#10;Lütfen bekleyin...</Translation>
+        <Translation Language="ENG">Test Starting...&#10;&#10;Please wait...</Translation>
+      </Text>
+      <Text Id="warnvoltage" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB" Alignment="Center">DONANIM ARIZASI:&#10;PATLATMA VOLTAJI DÜŞÜK!</Translation>
+        <Translation Language="ENG" Alignment="Center">HARDWARE FAULT:&#10;BLAST VOLTAGE LOW!</Translation>
+      </Text>
+      <Text Id="warnfatalcomm" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB" Alignment="Center">KRİTİK HATA:&#10;BMB İLETİŞİMİ KOPTU!</Translation>
+        <Translation Language="ENG" Alignment="Center">FATAL ERROR:&#10;BMB COMM LOST!</Translation>
+      </Text>
+      <Text Id="warnsuccess" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB" Alignment="Center">ATIŞ BAŞARILI!</Translation>
+        <Translation Language="ENG" Alignment="Center">FIRING SUCCESSFUL!</Translation>
+      </Text>
+      <Text Id="warnmisfire" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB" Alignment="Center">ATIŞ BAŞARISIZ!&#10;MÜHİMMAT YUVADA KALDI</Translation>
+        <Translation Language="ENG" Alignment="Center">MISFIRE!&#10;AMMO STUCK IN TUBE</Translation>
+      </Text>
+      <Text Id="warnblastfail" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB" Alignment="Center">ATIŞ BAŞARISIZ!&#10;PATLATMA YAPILAMADI</Translation>
+        <Translation Language="ENG" Alignment="Center">FIRING FAILED!&#10;BLASTING ERROR</Translation>
+      </Text>
+      <Text Id="warncommerr" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB" Alignment="Center">BMB İLETİŞİM HATASI&#10; (READY ALINAMADI)</Translation>
+        <Translation Language="ENG" Alignment="Center">BMB COMM ERROR&#10;(NO READY SIGNAL)</Translation>
+      </Text>
+      <Text Id="warnwrongammo" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB" Alignment="Center">BÖLGEDE İSTENEN TİP MÜHİMMAT YOK!</Translation>
+        <Translation Language="ENG" Alignment="Center">DESIRED AMMO NOT IN AREA!</Translation>
+      </Text>
+      <Text Id="warnempty" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB" Alignment="Center">SEÇİLİ BÖLGE TAMAMEN BOŞ!</Translation>
+        <Translation Language="ENG" Alignment="Center">SELECTED AREA IS EMPTY!</Translation>
+      </Text>
+      <Text Id="warnnoammo" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB" Alignment="Center">MÜHİMMAT TİPİ SEÇİLMEDİ!</Translation>
+        <Translation Language="ENG" Alignment="Center">AMMO TYPE NOT SELECTED!</Translation>
+      </Text>
+      <Text Id="warnlocked" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB" Alignment="Center">SİSTEM KİLİTLİ! ATIŞ YAPILAMAZ</Translation>
+        <Translation Language="ENG" Alignment="Center">SYSTEM LOCKED! NO FIRE</Translation>
+      </Text>
+      <Text Id="popupcomm" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Hatlar Taranıyor...&#10;UART2, RS422, Ethernet, CAN</Translation>
+        <Translation Language="ENG">Scanning communication interfaces...&#10;UART2, RS422, Ethernet, CAN</Translation>
+      </Text>
+      <Text Id="popupbmb" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">BMB Güç Kartına Bağlanılıyor...&#10;Voltajlar Okunuyor...</Translation>
+        <Translation Language="ENG">Connecting to the BMB Power Board...&#10;Reading voltages...</Translation>
+      </Text>
+      <Text Id="popupbutton" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Lütfen test etmek istediğiniz&#10;tuşa veya şaltere basın.&#10;&#10;Bekleniyor...</Translation>
+        <Translation Language="ENG">Please press the button &#10;or switch you want to test.&#10;&#10;Waiting...</Translation>
+      </Text>
+      <Text Id="popupses" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Hoparlörden sırayla&#10;Düşük, Orta ve Yüksek alarm&#10;ritimleri çalınacaktır...</Translation>
+        <Translation Language="ENG">Low, Medium, and High alarm tones will be played sequentially through the speaker...</Translation>
+      </Text>
+      <Text Id="popupled" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Konsol LED'leri sırayla&#10;Kırmızı, Yeşil ve Turuncu&#10;olarak test ediliyor...</Translation>
+        <Translation Language="ENG">The console LEDs are &#10;being tested sequentially in &#10;Red, Green, and Amber...</Translation>
+      </Text>
+      <Text Id="popupdone" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Test Tamamlandı!&#10;&#10;Çıkmak için (GERİ)&#10;Tekrar başlatmak için (ENTER)</Translation>
+        <Translation Language="ENG">Test Completed!&#10;&#10;Press (BACK) to Exit&#10;Press (ENTER) to Restart</Translation>
+      </Text>
+      <Text Id="popupbrightness" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Ekran parlaklığı 5 tur boyunca&#10;kısılıp tekrar açılacaktır.&#10;&#10;Test Başlıyor...</Translation>
+        <Translation Language="ENG">LCD Brightness will fade&#10;in and out for 5 cycles.&#10;&#10;Test Starting...</Translation>
+      </Text>
+      <Text Id="testcomm" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">İletişim Durumu</Translation>
+        <Translation Language="ENG">Communication Status</Translation>
+      </Text>
+      <Text Id="testbmb" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">BMB Güç ve Voltaj Testi</Translation>
+        <Translation Language="ENG">BMB Power &amp; Voltage Test</Translation>
+      </Text>
+      <Text Id="testbutton" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">Buton Testi</Translation>
+        <Translation Language="ENG">Button &amp; Switch Test</Translation>
+      </Text>
+      <Text Id="testbuzzer" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">Sesli Uyarı Testi</Translation>
+        <Translation Language="ENG">Buzzer / Audio Test</Translation>
+      </Text>
+      <Text Id="testled" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">Konsol LED Testi</Translation>
+        <Translation Language="ENG">Console LED Test</Translation>
+      </Text>
+      <Text Id="testbrightness" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">Ekran Parlaklık Testi</Translation>
+        <Translation Language="ENG">Display Brightness Test</Translation>
+      </Text>
+      <Text Id="langen" Alignment="Left" TypographyId="medium">
+        <Translation Language="GB">ENGLISH</Translation>
+        <Translation Language="ENG">ENGLISH</Translation>
+      </Text>
+      <Text Id="langtr" Alignment="Left" TypographyId="medium">
+        <Translation Language="GB">TÜRKÇE</Translation>
+        <Translation Language="ENG">TÜRKÇE</Translation>
+      </Text>
+      <Text Id="settinglanguage" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">DİL/LANGUAGE</Translation>
+        <Translation Language="ENG">DİL/LANGUAGE</Translation>
+      </Text>
+      <Text Id="settingversion" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">YAZILIM SÜRÜMÜ</Translation>
+        <Translation Language="ENG">SOFTWARE VER.</Translation>
+      </Text>
+      <Text Id="show" Alignment="Left" TypographyId="medium">
+        <Translation Language="GB">GÖSTER</Translation>
+        <Translation Language="ENG">SHOW</Translation>
+      </Text>
+      <Text Id="settingnetwork" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">AĞ BİLGİLERİ</Translation>
+        <Translation Language="ENG">NETWORK INFO</Translation>
+      </Text>
+      <Text Id="settingvolume" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">SES SEVİYESİ</Translation>
+        <Translation Language="ENG">VOLUME LEVEL</Translation>
+      </Text>
+      <Text Id="settingled" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">LED PARLAKLIĞI</Translation>
+        <Translation Language="ENG">LED BRIGHTNESS</Translation>
+      </Text>
+      <Text Id="settingbrightness" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">EKRAN PARLAKLIĞI</Translation>
+        <Translation Language="ENG">LCD BRIGHNESS</Translation>
+      </Text>
+      <Text Id="warnoff" Alignment="Left" TypographyId="medium">
+        <Translation Language="GB">KAPALI</Translation>
+        <Translation Language="ENG">OFF</Translation>
+      </Text>
+      <Text Id="warnon" Alignment="Left" TypographyId="medium">
+        <Translation Language="GB">AÇIK</Translation>
+        <Translation Language="ENG">ON</Translation>
+      </Text>
+      <Text Id="settingwarnings" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">SİSTEM UYARILARI</Translation>
+        <Translation Language="ENG">SYSTEM WARNINGS</Translation>
+      </Text>
+      <Text Id="version" Alignment="Left" TypographyId="medium">
+        <Translation Language="GB">V_1.18</Translation>
+        <Translation Language="ENG">V_1.18</Translation>
+      </Text>
+      <Text Id="modesalvo" Alignment="Left" TypographyId="medium">
+        <Translation Language="GB">SÜREKLİ</Translation>
+        <Translation Language="ENG">SALVO (AUTO)</Translation>
+      </Text>
+      <Text Id="modesingle" Alignment="Left" TypographyId="medium">
+        <Translation Language="GB">TEK TUR</Translation>
+        <Translation Language="ENG">SINGLE </Translation>
+      </Text>
+      <Text Id="settingmode" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">ATIŞ MODU</Translation>
+        <Translation Language="ENG">FIRING MODE</Translation>
+      </Text>
+      <Text Id="__SingleUse_T79Q" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">New Text</Translation>
+        <Translation Language="ENG">New Text</Translation>
+      </Text>
+      <Text Id="__SingleUse_J5UR" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">New Text</Translation>
+        <Translation Language="ENG">New Text</Translation>
+      </Text>
+      <Text Id="__SingleUse_60WZ" Alignment="Center" TypographyId="mediumBold">
+        <Translation Language="GB">&lt;value&gt;</Translation>
+        <Translation Language="ENG">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="__SingleUse_NQY1" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">&lt;value&gt;</Translation>
+        <Translation Language="ENG">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="__SingleUse_RLMO" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">New Text</Translation>
+        <Translation Language="ENG">New Text</Translation>
+      </Text>
+      <Text Id="__SingleUse_846S" Alignment="Center" TypographyId="mediumBold">
+        <Translation Language="GB">&lt;value&gt;</Translation>
+        <Translation Language="ENG">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="__SingleUse_D6EG" Alignment="Center" TypographyId="mediumBold">
+        <Translation Language="GB">Sistem Normal Arıza Yok</Translation>
+        <Translation Language="ENG">System Normal – No Faults</Translation>
+      </Text>
+      <Text Id="__SingleUse_ZJIW" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">New Text</Translation>
+        <Translation Language="ENG">New Text</Translation>
+      </Text>
+      <Text Id="__SingleUse_JEL3" Alignment="Center" TypographyId="RadarFont">
+        <Translation Language="GB">&lt;value&gt;</Translation>
+        <Translation Language="ENG">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="__SingleUse_MA7A" Alignment="Left" TypographyId="medium">
+        <Translation Language="GB">NEW TEXT</Translation>
+        <Translation Language="ENG">NEW TEXT</Translation>
+      </Text>
+      <Text Id="__SingleUse_65JV" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">IP : 192.168.71.3&#10;Port : 5453&#10;Soft Ver : ESE-LIAS-V1.18</Translation>
+        <Translation Language="ENG">IP : 192.168.71.3&#10;Port : 5453&#10;Soft Ver : ESE-LIAS-V1.18</Translation>
+      </Text>
+      <Text Id="__SingleUse_QIMS" Alignment="Center" TypographyId="mediumBold">
+        <Translation Language="GB">Cihaz Bilgileri</Translation>
+        <Translation Language="ENG">Device Info</Translation>
+      </Text>
+      <Text Id="cihazbilgileri" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">Cihaz Bilgileri</Translation>
+        <Translation Language="ENG">Device Info</Translation>
+      </Text>
+      <Text Id="ledparlaklik" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">LED Parlaklığı</Translation>
+        <Translation Language="ENG">LED Brightness</Translation>
+      </Text>
+      <Text Id="sistemuyarilari" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">Sistem Uyarıları</Translation>
+        <Translation Language="ENG">System Warning</Translation>
+      </Text>
+      <Text Id="atismodu" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">Atış Modu</Translation>
+        <Translation Language="ENG">Fire Mod</Translation>
+      </Text>
+      <Text Id="__SingleUse_0F6D" Alignment="Left" TypographyId="medium">
+        <Translation Language="GB">New Text</Translation>
+        <Translation Language="ENG">New Text</Translation>
+      </Text>
+      <Text Id="__SingleUse_EGMV" Alignment="Center" TypographyId="medium">
+        <Translation Language="GB">&lt;value&gt;</Translation>
+        <Translation Language="ENG">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="__SingleUse_3AHG" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">&lt;value&gt;</Translation>
+        <Translation Language="ENG">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="__SingleUse_E9V1" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">OLAY KAYITLARI</Translation>
+        <Translation Language="ENG">LOGS</Translation>
+      </Text>
+      <Text Id="__SingleUse_8LWR" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">SİSTEM TESTLERİ</Translation>
+        <Translation Language="ENG">SYSTEM TESTS</Translation>
+      </Text>
+      <Text Id="__SingleUse_WFWI" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">SİSTEM ARIZALARI</Translation>
+        <Translation Language="ENG">SYSTEM FAULTS</Translation>
+      </Text>
+      <Text Id="__SingleUse_9WJO" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">AYARLAR</Translation>
+        <Translation Language="ENG">SETTINGS</Translation>
+      </Text>
+      <Text Id="__SingleUse_F1IL" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">New Text</Translation>
+        <Translation Language="ENG">New Text</Translation>
+      </Text>
+      <Text Id="__SingleUse_F6DO" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">&lt;value&gt;</Translation>
+        <Translation Language="ENG">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="__SingleUse_CNA4" Alignment="Center" TypographyId="Large">
+        <Translation Language="GB">UYARI</Translation>
+        <Translation Language="ENG">WARNING</Translation>
+      </Text>
+      <Text Id="__SingleUse_TYP3" Alignment="Left" TypographyId="SmallExtra">
+        <Translation Language="GB">BOŞ</Translation>
+        <Translation Language="ENG">IDLE</Translation>
+      </Text>
+      <Text Id="__SingleUse_3R50" Alignment="Left" TypographyId="SmallExtra">
+        <Translation Language="GB">TAHRİP</Translation>
+        <Translation Language="ENG">FRAGMENTATION</Translation>
+      </Text>
+      <Text Id="__SingleUse_V6LJ" Alignment="Left" TypographyId="SmallExtra">
+        <Translation Language="GB">SİS</Translation>
+        <Translation Language="ENG">SMOKE</Translation>
+      </Text>
+      <Text Id="__SingleUse_MKZA" Alignment="Left" TypographyId="SmallExtra">
+        <Translation Language="GB">ARIZA</Translation>
+        <Translation Language="ENG">FAULT</Translation>
+      </Text>
+      <Text Id="MENU_SOFTRESET" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">SOFT RESET</Translation>
+        <Translation Language="ENG">SOFT RESET</Translation>
+      </Text>
+      <Text Id="MENU_ZEROIZE" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">ACİL SİL</Translation>
+        <Translation Language="ENG">ZEROIZE</Translation>
+      </Text>
+      <Text Id="MENU_LOGLAR" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">OLAY KAYITLARI</Translation>
+        <Translation Language="ENG">LOGS</Translation>
+      </Text>
+      <Text Id="MENU_AYARLAR" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">AYARLAR</Translation>
+        <Translation Language="ENG">SETTINGS</Translation>
+      </Text>
+      <Text Id="MENU_ARIZA" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">ARIZALAR</Translation>
+        <Translation Language="ENG">FAULTS</Translation>
+      </Text>
+      <Text Id="MENU_TEST" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">TESTLER</Translation>
+        <Translation Language="ENG">TESTS</Translation>
+      </Text>
+      <Text Id="__SingleUse_880G" Alignment="Left" TypographyId="Large">
+        <Translation Language="GB">MENÜ</Translation>
+        <Translation Language="ENG">MENU</Translation>
+      </Text>
+      <Text Id="__SingleUse_0J6B" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">(3/4)</Translation>
+        <Translation Language="ENG">(3/4)</Translation>
+      </Text>
+      <Text Id="__SingleUse_AA2P" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">&lt;value&gt;</Translation>
+        <Translation Language="ENG">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="__SingleUse_8IH4" Alignment="Left" TypographyId="mediumBold">
+        <Translation Language="GB">MÜHİMMAT DURUMU</Translation>
+        <Translation Language="ENG">AMMUNITION STATUS</Translation>
+      </Text>
+      <Text Id="ses" Alignment="Center" TypographyId="SmallExtra">
+        <Translation Language="GB">Ses</Translation>
+        <Translation Language="ENG">Volume</Translation>
+      </Text>
+      <Text Id="parlaklik" Alignment="Center" TypographyId="SmallExtra">
+        <Translation Language="GB">Parlaklık</Translation>
+        <Translation Language="ENG">Brightness</Translation>
+      </Text>
+      <Text Id="radarAngle" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">&lt;value&gt;</Translation>
+        <Translation Language="ENG">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="__SingleUse_MBFN" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">360</Translation>
+        <Translation Language="ENG">360</Translation>
+      </Text>
+      <Text Id="__SingleUse_PSFS" Alignment="Center" TypographyId="RadarFont">
+        <Translation Language="GB">&lt;value&gt;°</Translation>
+        <Translation Language="ENG">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="__SingleUse_W393" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">60</Translation>
+        <Translation Language="ENG">60</Translation>
+      </Text>
+      <Text Id="__SingleUse_SA7O" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">30</Translation>
+        <Translation Language="ENG">30</Translation>
+      </Text>
+      <Text Id="__SingleUse_M4MU" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">120</Translation>
+        <Translation Language="ENG">120</Translation>
+      </Text>
+      <Text Id="__SingleUse_H003" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">150&#10;</Translation>
+        <Translation Language="ENG">150</Translation>
+      </Text>
+      <Text Id="__SingleUse_FN0R" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">210</Translation>
+        <Translation Language="ENG">210</Translation>
+      </Text>
+      <Text Id="__SingleUse_9F3K" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">240</Translation>
+        <Translation Language="ENG">240</Translation>
+      </Text>
+      <Text Id="__SingleUse_D3YZ" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">300</Translation>
+        <Translation Language="ENG">300</Translation>
+      </Text>
+      <Text Id="__SingleUse_E4RK" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">330</Translation>
+        <Translation Language="ENG">330</Translation>
+      </Text>
+      <Text Id="__SingleUse_CSV8" Alignment="Left" TypographyId="SmallBold">
+        <Translation Language="GB">180</Translation>
+        <Translation Language="ENG">180</Translation>
+      </Text>
+      <Text Id="__SingleUse_JZR1" Alignment="Left" TypographyId="SmallBold">
+        <Translation Language="GB">90</Translation>
+        <Translation Language="ENG">90</Translation>
+      </Text>
+      <Text Id="__SingleUse_681Y" Alignment="Left" TypographyId="SmallBold">
+        <Translation Language="GB">270</Translation>
+        <Translation Language="ENG">270</Translation>
+      </Text>
+      <Text Id="__SingleUse_ERB1" Alignment="Left" TypographyId="SmallBold">
+        <Translation Language="GB">0</Translation>
+        <Translation Language="ENG">0</Translation>
+      </Text>
+    </TextGroup>
+  </Texts>
+  <Typographies>
+    <Typography Id="Default" Font="verdana.ttf" Size="20" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="şŞıİğĞüÜçÇöÖ" WildcardCharacterRanges="0-9,0x0020-0x017F" />
+    <Typography Id="Small" Font="verdana.ttf" Size="15" Bpp="8" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="I,II,III,IV,şŞıİğĞüÜçÇöÖ" WildcardCharacterRanges="0-9,0x0020-0x017F,A-Z" />
+    <Typography Id="SmallBold" Font="verdanab.ttf" Size="16" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="şŞıİğĞüÜçÇöÖ0123456789:." WildcardCharacterRanges="0-9,0x0020-0x017F,A-Z" />
+    <Typography Id="RadarFont" Font="verdanab.ttf" Size="15" Bpp="8" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="°şŞıİğĞüÜçÇöÖ-" WildcardCharacterRanges="0-9,0x0020-0x017F,A-Z" />
+    <Typography Id="SmallExtra" Font="verdana.ttf" Size="12" Bpp="8" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="şŞıİğĞüÜçÇöÖ0123456789:." WildcardCharacterRanges="0-9,0x0020-0x017F,A-Z" />
+    <Typography Id="Large" Font="verdana.ttf" Size="30" Bpp="8" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="şŞıİğĞüÜçÇöÖ" WildcardCharacterRanges="0x0020-0x017F,A-Z" />
+    <Typography Id="mediumBold" Font="verdanab.ttf" Size="25" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="şŞıİğĞüÜçÇöÖ" WildcardCharacterRanges="0x0020-0x017F,A-Z" />
+    <Typography Id="medium" Font="verdana.ttf" Size="25" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="şŞıİğĞüÜçÇöÖ" WildcardCharacterRanges="0x0020-0x017F,A-Z" />
+    <Typography Id="SmallExtraBold" Font="verdanab.ttf" Size="12" Bpp="8" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacters="şŞıİğĞüÜçÇöÖ0123456789:." WildcardCharacterRanges="0-9,0x0020-0x017F,A-Z" />
+  </Typographies>
+</TextDatabase>
