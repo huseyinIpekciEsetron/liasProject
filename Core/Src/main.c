@@ -153,6 +153,10 @@ uint32_t lattime = 0;
 
 volatile uint32_t dbg_loopMaxMs = 0;
 volatile uint32_t dbg_loopCount = 0;
+volatile uint32_t dbg_bmbFps    = 0;   /* BMB cerceve / saniye */
+volatile uint32_t dbg_loopFps   = 0;   /* ana dongu turu / saniye */
+volatile uint32_t dbg_loopMax1s = 0;   /* SON 1 saniyedeki en kotu tur */
+volatile uint32_t dbg_rawTotal = 0;
 
 volatile uint8_t dbg_send_sys_status = 0;
 // İşlemci Hataları [0]: Byte 7-8, [1]: Byte 9-10, [2]: Byte 11-12
@@ -360,11 +364,25 @@ int main(void)
     /* USER CODE BEGIN 3 */
   	  uint32_t current_time = HAL_GetTick(); // Sistemin o anki milisaniyesini tek sefer çek
 
-  	  static uint32_t lastLoopMs = 0;
-	  uint32_t loopDt = current_time - lastLoopMs;
+  	static uint32_t lastLoopMs = 0;
+	  if (lastLoopMs != 0U) {                     /* ilk tur artefakt, sayma */
+		  uint32_t loopDt = current_time - lastLoopMs;
+		  if (loopDt > dbg_loopMaxMs) dbg_loopMaxMs = loopDt;
+	  }
 	  lastLoopMs = current_time;
-	  if (loopDt > dbg_loopMaxMs) dbg_loopMaxMs = loopDt;
 	  dbg_loopCount++;
+	  static uint32_t rateT0 = 0, rawN0 = 0, loopN0 = 0;
+	if (current_time - rateT0 >= 1000U)
+	{
+		rateT0        = current_time;
+		dbg_bmbFps    = dbg_rawTotal  - rawN0;   rawN0  = dbg_rawTotal;
+		dbg_loopFps   = dbg_loopCount - loopN0;  loopN0 = dbg_loopCount;
+		dbg_loopMax1s = dbg_loopMaxMs;           /* pencereyi yayinla */
+		dbg_loopMaxMs = 0;                       /* ve sifirla */
+	}
+
+
+
   	  // =========================================================
 	  // GÖREV: KABLO BA�?LANTISI KONTROLÜ (1 Hz -> 1000ms)
 	  // PHY Link Status çok ağır bir işlemdir, saniyede 1 kez sorulur.

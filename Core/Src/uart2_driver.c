@@ -9,6 +9,8 @@
 #include "uart2_driver.h"
 #include <string.h>
 
+extern volatile uint32_t dbg_rawTotal;
+
 extern CRC_HandleTypeDef hcrc;          /* main.c'de tanimli, su ana kadar kullanilmiyordu */
 
 #define BMB_FRAME_LEN   64U
@@ -152,6 +154,7 @@ void UART2_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 
 		if (Size == BMB_FRAME_LEN)
 		{
+			 dbg_rawTotal++;
 			uint8_t next = (uint8_t)((rawHead + 1U) % BMB_RX_SLOTS);
 
 			if (next == rawTail) {
