@@ -322,7 +322,6 @@ private:
 	void dispatchWarning(WarningType warning, int tubeIndex = -1);
 
 	// --- CBIT (Cihaz İçi Sürekli Test) Değişkenleri ---
-	uint32_t last_rx_time;
 	bool comm_lost_flag;
 	bool hw_error_flag;
 

@@ -66,7 +66,6 @@ Model::Model() : modelListener(0), isBlackoutMode(false), savedBrightnessPWM(60)
     last_raw_button_state = 0;
 
     // CBIT Başlangıç değerleri
-    last_rx_time = HAL_GetTick();
     comm_lost_flag = false;
     hw_error_flag = false;
     for (int i = 0; i < MAX_TARGETS; i++)
@@ -578,8 +577,6 @@ void Model::processSmokeScreen()
 {
     if (BMB_Check_New_Data() == true)
     {
-        // İletişim Var: CBIT Zamanlayıcısını Güncelle
-        last_rx_time = HAL_GetTick();
 
         BMB_RxPacket_t rxData;
         BMB_Get_Latest_Rx_Data(&rxData);
@@ -1176,7 +1173,7 @@ void Model::processBackgroundVerifications()
 void Model::processCBIT()
 {
     // 1. İLETİŞİM KOPTU KONTROLÜ
-    if (HAL_GetTick() - last_rx_time > 3000)
+    if (HAL_GetTick() - BMB_Get_Last_Valid_Rx_Time() > 3000)
     {
         if (!comm_lost_flag) {
             comm_lost_flag = true;

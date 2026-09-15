@@ -79,7 +79,7 @@ extern "C" {
 void BMB_Get_Latest_Rx_Data(BMB_RxPacket_t *out_data);
 bool BMB_Check_New_Data(void);
 void BMB_Set_Tx_Command(bool power_ready, uint16_t sis_mask, uint16_t frag_mask);
-
+uint32_t BMB_Get_Last_Valid_Rx_Time(void);
 #ifdef __cplusplus
 }
 #endif

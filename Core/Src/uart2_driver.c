@@ -42,6 +42,7 @@ static uint8_t current_tx_power_ready = 0x00;
 static uint8_t current_tx_sis_blast[16] = {0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55};
 static uint8_t current_tx_frag_blast[16] = {0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55};
 
+static volatile uint32_t last_valid_rx_ms = 0U;
 
 /**
  * @brief Yazılımsal CRC32 Hesaplama Fonksiyonu
@@ -143,7 +144,6 @@ void UART2_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 		/* Tampon .ram_d2'de ve non-cacheable oldugu icin invalidate
 		 * artik gereksiz; yine de zararsiz olsun diye biraktik.
 		 * Adim 2 dogrulandiktan sonra silinebilir. */
-		SCB_InvalidateDCache_by_Addr((uint32_t *)uart2_rx_buffer, UART2_RX_BUFFER_SIZE);
 
 		if (Size == BMB_FRAME_LEN)
 		{
@@ -273,7 +273,7 @@ void UART2_ProcessRxFrame(void)
 {
     if (!rawFrameReady) return;
 
-    uint8_t local[BMB_FRAME_LEN];
+    uint8_t local[BMB_FRAME_LEN] __attribute__((aligned(4)));
 
     /* Kisa kritik bolum: 64 bayt kopyalarken ISR araya girmesin.
      * ~100 ns surer, kesme gecikmesine etkisi ihmal edilebilir. */
@@ -301,9 +301,13 @@ void UART2_ProcessRxFrame(void)
                      ((uint32_t)local[63]);
 
     if (hesaplanan == gelen)
-    {
-        memcpy(&Validated_Rx_Packet, paket, sizeof(BMB_RxPacket_t));
-        new_bmb_data_flag = true;
-        last_rx_time = HAL_GetTick();   /* CBIT'in iletisim izlemesi icin */
-    }
+	{
+		memcpy(&Validated_Rx_Packet, paket, sizeof(BMB_RxPacket_t));
+		new_bmb_data_flag = true;
+		last_valid_rx_ms  = HAL_GetTick();   /* gercek varis zamani */
+	}
+}
+uint32_t BMB_Get_Last_Valid_Rx_Time(void)
+{
+    return last_valid_rx_ms;
 }
