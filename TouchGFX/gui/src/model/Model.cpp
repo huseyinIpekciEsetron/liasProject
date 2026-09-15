@@ -302,8 +302,6 @@ void Model::tick()
 
     // buzzer
     /* --- Sesli ikaz --- */
-	processThreatAlarm();
-
 	if (buzzerManualOverride) {
 		Buzzer_SetAlarmLevel(buzzerlevel);     /* test ekrani */
 	} else {
@@ -329,7 +327,7 @@ void Model::processThreatAlarm()
             threatDataFresh   = false;
             tehdidler.isValid = false;
             tehdidler.count   = 0;
-            comm_lost_flag    = true;
+            tlus_comm_lost_flag = true;
 
             dispatchWarning(WARN_COMM_LOST);
 
@@ -342,10 +340,12 @@ void Model::processThreatAlarm()
          * "ILETISIM KOPTU" hatasi aktif kalir. Bayat veriyle
          * otmek, otmemekten daha tehlikeli. */
         threatAlarmLevel = ALARM_NONE;
+        lastBurstMs      = 0U;
+		Buzzer_Stop();
         return;
     }
 
-    if (!threatDataFresh) { threatDataFresh = true; comm_lost_flag = false; }
+    if (!threatDataFresh) { threatDataFresh = true; tlus_comm_lost_flag = false; }
 
     /* --- 2. EN YUKSEK SIDDETLI AKTIF TEHDIT --- */
 	ThreatResponse worst = { ALARM_NONE, false, 0U };
@@ -379,19 +379,30 @@ void Model::processThreatAlarm()
 	/* --- 4. SEVIYE DEGISIMI --- */
 	bool levelChanged = false;
 
-	if (worst.level > threatAlarmLevel) {
-		levelChanged = true;                                    /* tirmanma: aninda */
-	} else if (worst.level < threatAlarmLevel &&
-			   (int32_t)(now - alarmHoldUntilMs) >= 0) {
-		levelChanged = true;                                    /* dusus: hold dolunca */
+	if (worst.level > threatAlarmLevel)
+	{
+		levelChanged = true;                    /* tirmanma: aninda */
+	}
+	else if (worst.level < threatAlarmLevel)
+	{
+		/* Mevcut seviye artik hicbir aktif tehditle dogrulanmiyor.
+		 * Hold'u YENILEME - dolmasini bekle, sonra in. */
+		if ((int32_t)(now - alarmHoldUntilMs) >= 0) {
+			levelChanged = true;
+		}
+	}
+	else
+	{
+		/* Ayni seviye devam ediyor - hold'u tazele */
+		alarmHoldUntilMs = now + ALARM_MIN_HOLD_MS;
 	}
 
 	if (levelChanged) {
 		threatAlarmLevel = worst.level;
-		lastBurstMs      = 0U;      /* hatirlatmayi hemen tetikle */
-		Buzzer_Stop();              /* eski deseni kes */
+		alarmHoldUntilMs = now + ALARM_MIN_HOLD_MS;
+		lastBurstMs      = 0U;
+		Buzzer_Stop();
 	}
-	alarmHoldUntilMs = now + ALARM_MIN_HOLD_MS;
 
 	/* --- 5. KARSI TEDBIR ONAYI ---
 	 * Operator sis/frag attiysa uyariyi almis ve aksiyon almistir.

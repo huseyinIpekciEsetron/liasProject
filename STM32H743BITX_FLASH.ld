@@ -156,6 +156,34 @@ SECTIONS
     __bss_end__ = _ebss;
   } >RAM_D1
 
+/* D2 SRAM - DMA ile paylasilan tamponlar.
+   * MPU Region 1 (0x30000000, 128K) burayi NON-CACHEABLE yapiyor.
+   * DMA'nin dokundugu her tampon BURAYA konmali; boylece
+   * cache tutarliligi derdi bastan cozulur.
+   * NOLOAD: startup kodu bu bolgeyi kopyalamaz ve sifirlamaz. */
+  .ram_d2 (NOLOAD) :
+  {
+    . = ALIGN(32);
+    _sram_d2 = .;
+    *(.ram_d2)
+    *(.ram_d2*)
+    . = ALIGN(32);
+    _eram_d2 = .;
+  } >RAM_D2
+
+  /* Reset'ten etkilenmeyen degiskenler (hata isaretcisi vb.).
+   * SRAM icerigi reset sirasinda donanimsal olarak silinmez,
+   * yeter ki startup kodu sifirlamasin - NOLOAD bunu saglar. */
+  .noinit (NOLOAD) :
+  {
+    . = ALIGN(4);
+    _snoinit = .;
+    *(.noinit)
+    *(.noinit*)
+    . = ALIGN(4);
+    _enoinit = .;
+  } >RAM_D2
+  
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_heap_stack :
   {

@@ -364,12 +364,13 @@ private:
 	AlarmLevel_t threatAlarmLevel   = ALARM_NONE;
 	uint32_t     lastThreatMsgMs    = 0;
 	uint32_t     alarmHoldUntilMs   = 0;
-	bool         threatDataFresh    = false;
+	bool         threatDataFresh    = true;
 	bool         buzzerManualOverride = false;   /* test ekrani icin */
 
 	void processThreatAlarm();
 	uint32_t lastBurstMs           = 0;
 	uint32_t lastCounterMeasureMs  = 0;
+	 bool tlus_comm_lost_flag = false;
 };
 
 #endif // MODEL_HPP

@@ -14,9 +14,12 @@ uint8_t temp_ethernet_ip[4] = {0};
 uint16_t temp_port = 0;
 
 // MPU ve DMA Adresleri
-uint8_t *spi_dma_tx_buf = (uint8_t *)0x30000000;
-uint8_t *spi_dma_rx_buf = (uint8_t *)0x30000800;
 #define DMA_BUF_SIZE 2048
+__attribute__((section(".ram_d2"), aligned(32)))
+static uint8_t spi_dma_tx_buf[DMA_BUF_SIZE];
+
+__attribute__((section(".ram_d2"), aligned(32)))
+static uint8_t spi_dma_rx_buf[DMA_BUF_SIZE];
 #define SPI_BURST_TIMEOUT_MS  20U
 
 volatile Eth_Status_t eth_status = ETH_ERR_NO_CHIP;
