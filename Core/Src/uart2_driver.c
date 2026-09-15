@@ -9,6 +9,16 @@
 #include "uart2_driver.h"
 #include <string.h>
 
+extern CRC_HandleTypeDef hcrc;          /* main.c'de tanimli, su ana kadar kullanilmiyordu */
+
+#define BMB_FRAME_LEN   64U
+
+/* ISR ile ana dongu arasindaki tek paylasim noktasi.
+ * ISR yalnizca buraya yazar; dogrulama ana donguye ait. */
+static volatile uint8_t  rawFrame[BMB_FRAME_LEN];
+static volatile bool     rawFrameReady = false;
+static volatile uint32_t rawFrameDropped = 0U;   /* teshis sayaci */
+
 // MPU ayarlarında Non-Cacheable yaptığın SRAM alanına yerleştiriyoruz
 #if defined ( __GNUC__ )
     __attribute__((section(".ram_d2"), aligned(32))) uint8_t uart2_rx_buffer[UART2_RX_BUFFER_SIZE];
@@ -128,47 +138,25 @@ void UART2_TxCpltCallback(UART_HandleTypeDef *huart)
  */
 void UART2_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
-    if (huart->Instance == USART2)
-    {
-    	SCB_InvalidateDCache_by_Addr((uint32_t *)uart2_rx_buffer, UART2_RX_BUFFER_SIZE);
+	if (huart->Instance == USART2)
+	{
+		/* Tampon .ram_d2'de ve non-cacheable oldugu icin invalidate
+		 * artik gereksiz; yine de zararsiz olsun diye biraktik.
+		 * Adim 2 dogrulandiktan sonra silinebilir. */
+		SCB_InvalidateDCache_by_Addr((uint32_t *)uart2_rx_buffer, UART2_RX_BUFFER_SIZE);
 
-    	// 1. BOYUT KONTROLÜ: Paket tam 64 byte mı?
-		if (Size == 64)
+		if (Size == BMB_FRAME_LEN)
 		{
-			BMB_RxPacket_t *gelen_paket = (BMB_RxPacket_t *)uart2_rx_buffer;
-
-			// 2. HEADER VE FOOTER KONTROLÜ (0x01 olduğuna dikkat!)
-			if (gelen_paket->header[0] == 'E' && gelen_paket->header[1] == 'S' &&
-				gelen_paket->header[2] == 'E' && gelen_paket->header[3] == 0x01 &&
-				gelen_paket->footer[0] == 'O' && gelen_paket->footer[1] == 'N')
-			{
-				// 3. CRC HESAPLAMA VE KONTROL
-				uint32_t hesaplanan_crc = Calculate_Software_CRC32((uint8_t*)gelen_paket, 60);
-
-				// Gelen CRC'yi Big Endian olarak okuyup birleştiriyoruz
-				uint32_t gelen_crc = ((uint32_t)uart2_rx_buffer[60] << 24) |
-									 ((uint32_t)uart2_rx_buffer[61] << 16) |
-									 ((uint32_t)uart2_rx_buffer[62] << 8)  |
-									 ((uint32_t)uart2_rx_buffer[63]);
-
-				if (hesaplanan_crc == gelen_crc)
-				{
-					// =======================================================
-					// PAKET %100 DOĞRU VE GÜVENLİ! KASAYA KAYDET.
-					// =======================================================
-					memcpy(&Validated_Rx_Packet, gelen_paket, sizeof(BMB_RxPacket_t));
-
-					new_bmb_data_flag = true; // Arayüze haber vermek için bayrağı kaldır!
-				}
+			if (rawFrameReady) {
+				rawFrameDropped++;      /* ana dongu yetisememis - teshis icin say */
 			}
+			memcpy((void *)rawFrame, uart2_rx_buffer, BMB_FRAME_LEN);
+			rawFrameReady = true;       /* SON yazilan: yayinlama noktasi */
 		}
-        // =======================================================
-        // NORMAL MODUN ALTIN KURALI:
-        // Mevcut dinleme bittiği için, bir sonraki paket için DMA'yı TEKRAR BAŞLAT!
-        // =======================================================
-        HAL_UARTEx_ReceiveToIdle_DMA(UART2_huartx, uart2_rx_buffer, UART2_RX_BUFFER_SIZE);
-        __HAL_DMA_DISABLE_IT(UART2_huartx->hdmarx, DMA_IT_HT);
-    }
+
+		HAL_UARTEx_ReceiveToIdle_DMA(UART2_huartx, uart2_rx_buffer, UART2_RX_BUFFER_SIZE);
+		__HAL_DMA_DISABLE_IT(UART2_huartx->hdmarx, DMA_IT_HT);
+	}
 }
 
 /**
@@ -274,5 +262,48 @@ void BMB_Set_Tx_Command(bool power_ready, uint16_t sis_mask, uint16_t frag_mask)
         // Eğer o bit 1 ise (Seçilmişse) 0xAA yolla, değilse 0x55 (Ateşleme)
         current_tx_sis_blast[i]  = ((sis_mask & (1 << i)) != 0)  ? 0xAA : 0x55;
         current_tx_frag_blast[i] = ((frag_mask & (1 << i)) != 0) ? 0xAA : 0x55;
+    }
+}
+
+/**
+ * @brief Ham cerceveyi dogrular ve gecerliyse yayinlar.
+ *        ANA DONGUDEN cagrilir, ISR'dan DEGIL.
+ */
+void UART2_ProcessRxFrame(void)
+{
+    if (!rawFrameReady) return;
+
+    uint8_t local[BMB_FRAME_LEN];
+
+    /* Kisa kritik bolum: 64 bayt kopyalarken ISR araya girmesin.
+     * ~100 ns surer, kesme gecikmesine etkisi ihmal edilebilir. */
+    uint32_t primask = __get_PRIMASK();
+    __disable_irq();
+    memcpy(local, (const void *)rawFrame, BMB_FRAME_LEN);
+    rawFrameReady = false;
+    __set_PRIMASK(primask);
+
+    /* --- Bundan sonrasi tamamen ana dongu baglaminda --- */
+    BMB_RxPacket_t *paket = (BMB_RxPacket_t *)local;
+
+    if (!(paket->header[0] == 'E' && paket->header[1] == 'S' &&
+          paket->header[2] == 'E' && paket->header[3] == 0x01 &&
+          paket->footer[0] == 'O' && paket->footer[1] == 'N')) {
+        return;
+    }
+
+    /* Donanim CRC birimi - yazilimsal 480 iterasyon yerine ~60 cevrim */
+    uint32_t hesaplanan = HAL_CRC_Calculate(&hcrc, (uint32_t *)local, 60U);
+
+    uint32_t gelen = ((uint32_t)local[60] << 24) |
+                     ((uint32_t)local[61] << 16) |
+                     ((uint32_t)local[62] <<  8) |
+                     ((uint32_t)local[63]);
+
+    if (hesaplanan == gelen)
+    {
+        memcpy(&Validated_Rx_Packet, paket, sizeof(BMB_RxPacket_t));
+        new_bmb_data_flag = true;
+        last_rx_time = HAL_GetTick();   /* CBIT'in iletisim izlemesi icin */
     }
 }

@@ -70,6 +70,7 @@ void UART2_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size);
 void UART2_ErrorCallback(UART_HandleTypeDef *huart);
 
 void UART2_Send_BMB_Test_Packet(void);
+void UART2_ProcessRxFrame(void);
 
 // C++ Tarafının (TouchGFX) verileri güvenle çekeceği fonksiyon (GETTER)
 #ifdef __cplusplus
