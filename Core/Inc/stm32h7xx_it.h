@@ -64,6 +64,7 @@ void DMA1_Stream5_IRQHandler(void);
 void USART1_IRQHandler(void);
 void USART2_IRQHandler(void);
 void FMC_IRQHandler(void);
+void TIM7_IRQHandler(void);
 void SPI4_IRQHandler(void);
 void LTDC_IRQHandler(void);
 void LTDC_ER_IRQHandler(void);

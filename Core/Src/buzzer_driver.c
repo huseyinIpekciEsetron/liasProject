@@ -69,21 +69,28 @@ static void Buzzer_ApplyVolume(void)
 
 void Buzzer_Play(AlarmLevel_t level, uint8_t repeats)
 {
-    if (level == ALARM_NONE || level >= ALARM_LEVEL_COUNT) { Buzzer_Stop(); return; }
+	if (level == ALARM_NONE || level >= ALARM_LEVEL_COUNT) { Buzzer_Stop(); return; }
 
-    current_alarm  = level;
-    patStep        = 0U;
-    patStepStart   = HAL_GetTick();
-    patRepeatsLeft = repeats;
+	uint32_t primask = __get_PRIMASK();
+	__disable_irq();
+	current_alarm  = level;
+	patStep        = 0U;
+	patStepStart   = HAL_GetTick();
+	patRepeatsLeft = repeats;
+	__set_PRIMASK(primask);
 
-    Buzzer_ApplyVolume();
-    Buzzer_Gate(true);
+	Buzzer_ApplyVolume();
+	Buzzer_Gate(true);
 }
 
 void Buzzer_Stop(void)
 {
+	uint32_t primask = __get_PRIMASK();
+	__disable_irq();
     current_alarm  = ALARM_NONE;
     patRepeatsLeft = 0U;
+    __set_PRIMASK(primask);
+
     Buzzer_Gate(false);
 }
 

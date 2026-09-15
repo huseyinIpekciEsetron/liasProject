@@ -91,6 +91,7 @@ DMA_HandleTypeDef hdma_spi4_tx;
 DMA_HandleTypeDef hdma_spi4_rx;
 
 TIM_HandleTypeDef htim4;
+TIM_HandleTypeDef htim7;
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
@@ -189,6 +190,7 @@ static void MX_I2C1_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_RTC_Init(void);
 static void MX_IWDG1_Init(void);
+static void MX_TIM7_Init(void);
 /* USER CODE BEGIN PFP */
 
 uint8_t SDRAM_Health_Test(void)
@@ -293,6 +295,7 @@ int main(void)
   MX_TIM4_Init();
   MX_RTC_Init();
   //MX_IWDG1_Init();
+  MX_TIM7_Init();
   MX_TouchGFX_Init();
   /* USER CODE BEGIN 2 */
 
@@ -469,11 +472,6 @@ int main(void)
           UDP_Send_Data(TARGET_1_SOCKET, udp_tx_buffer, strlen((char*)udp_tx_buffer), TARGET_1_IP, TARGET_1_PORT);
           TCP_Send_Data(TARGET_2_SOCKET, tcp_tx_buffer, strlen((char*)tcp_tx_buffer));
       }
-
-      // =========================================================
-      // BUZZER MOTORU (SÜREKLİ ÇALI�?IR)
-      // =========================================================
-      Buzzer_ProcessHandler();
 
       Debug_Data_Injector();
   }
@@ -1014,6 +1012,44 @@ static void MX_TIM4_Init(void)
 }
 
 /**
+  * @brief TIM7 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM7_Init(void)
+{
+
+  /* USER CODE BEGIN TIM7_Init 0 */
+
+  /* USER CODE END TIM7_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM7_Init 1 */
+
+  /* USER CODE END TIM7_Init 1 */
+  htim7.Instance = TIM7;
+  htim7.Init.Prescaler = 199;
+  htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim7.Init.Period = 999;
+  htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim7) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim7, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM7_Init 2 */
+
+  /* USER CODE END TIM7_Init 2 */
+
+}
+
+/**
   * @brief USART1 Initialization Function
   * @param None
   * @retval None
@@ -1402,6 +1438,13 @@ void Hardware_Transmit_Data(uint8_t* data, uint16_t length)
     // UDP_Send_Data(TARGET_1_SOCKET, data, length, TARGET_1_IP, TARGET_1_PORT);
 }
 
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM7)
+    {
+        Buzzer_ProcessHandler();   /* artik 1 ms cozunurlukte, jitter yok */
+    }
+}
 
 // C Tarafı İçin Basit Checksum Hesaplayıcı
 uint8_t Calculate_Checksum_C(uint8_t* data, uint16_t len) {
