@@ -151,14 +151,7 @@ volatile uint16_t dbg_time_dayOfYear  = 1;
 volatile uint16_t dbg_time_year       = 2026;
 
 uint32_t lattime = 0;
-
 volatile uint32_t dbg_loopMaxMs = 0;
-volatile uint32_t dbg_loopCount = 0;
-volatile uint32_t dbg_bmbFps    = 0;   /* BMB cerceve / saniye */
-volatile uint32_t dbg_loopFps   = 0;   /* ana dongu turu / saniye */
-volatile uint32_t dbg_loopMax1s = 0;   /* SON 1 saniyedeki en kotu tur */
-volatile uint32_t dbg_rawTotal = 0;
-volatile uint32_t dbg_loopMaxEver = 0;   /* hic otomatik sifirlanmaz */
 volatile uint32_t dbg_loopOver20  = 0;   /* 20 ms'yi asan tur sayisi */
 volatile uint32_t dbg_ltdcUnderrun = 0;
 volatile uint32_t dbg_ltdcXferErr  = 0;
@@ -339,18 +332,6 @@ int main(void)
   Buzzer_Init(&hdac1, DAC_CHANNEL_1);
   HAL_TIM_Base_Start_IT(&htim7);
 
-  /* ===== GECICI: uzun ara sonrasi faz deterministik mi? ===== */
-     /* 10 kez: 300 ms ses, 3 sn sessizlik.
-      * 3 sn, dahili osilatorun (750 ms periyot) sifirlanmasi icin
-      * fazlasiyla yeterli olmali. */
-     for (int i = 0; i < 10; i++)
-     {
-         HAL_GPIO_WritePin(BUZZER_MUTE_GPIO_Port, BUZZER_MUTE_Pin, GPIO_PIN_SET);
-         HAL_Delay(300);
-         HAL_GPIO_WritePin(BUZZER_MUTE_GPIO_Port, BUZZER_MUTE_Pin, GPIO_PIN_RESET);
-         HAL_Delay(3000);
-     }
-
   /*-- RTC Init --*/
   RTC_Init(&hrtc);
 
@@ -395,19 +376,6 @@ int main(void)
 		  if (loopDt > 20U)             dbg_loopOver20++;
 	  }
 	  lastLoopMs = current_time;
-	  dbg_loopCount++;
-	  static uint32_t rateT0 = 0, rawN0 = 0, loopN0 = 0;
-	if (current_time - rateT0 >= 1000U)
-	{
-		rateT0        = current_time;
-		dbg_bmbFps    = dbg_rawTotal  - rawN0;   rawN0  = dbg_rawTotal;
-		dbg_loopFps   = dbg_loopCount - loopN0;  loopN0 = dbg_loopCount;
-		dbg_loopMax1s = dbg_loopMaxMs;           /* pencereyi yayinla */
-		dbg_loopMaxMs = 0;                       /* ve sifirla */
-	}
-
-
-
 
   	  // =========================================================
 	  // GÖREV: KABLO BA�?LANTISI KONTROLÜ (1 Hz -> 1000ms)
@@ -489,6 +457,7 @@ int main(void)
       }
 
       Debug_Data_Injector();
+
   }
   /* USER CODE END 3 */
 }

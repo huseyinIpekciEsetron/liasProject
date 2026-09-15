@@ -12,6 +12,7 @@ extern "C" {
     void Set_LCD_Brightness(uint8_t value);
     extern volatile uint8_t radar_flag;
 	void Hardware_Transmit_Data(uint8_t* data, uint16_t length);
+
 }
 
 /* ICD: tehdit mesaji 40 ms periyotlu. 250 ms ~ 6 kacirilmis mesaj.
@@ -23,7 +24,6 @@ extern "C" {
  * alarm en az bu sure boyunca tutulur. */
 #define ALARM_MIN_HOLD_MS        3000U
 
-#define BURST_REPEATS          3U
 #define CM_ACK_WINDOW_MS   20000U   /* karsi tedbir sonrasi sessizlestirme */
 #define CM_ACK_REMINDER_MS  5000U   /* o pencerede hatirlatma araligi */
 

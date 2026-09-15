@@ -1,9 +1,13 @@
 #include "buzzer_driver.h"
 #include "main.h"
 
-/* Buzzer'in dahili 1 Hz kesicisinin ON fazi ~500 ms.
- * Hicbir ON adimi bunun altinda kalmali ki dahili kesici
- * hic devreye girmesin ve ritmi tamamen biz belirleyelim. */
+/* NOT: Bu desen degerleri CI36P-30E290-P-5X (pulsating) buzzer icindir.
+ * O parcanin dahili ~733 ms'lik kesicisi sifirlanamiyor; biz hizli
+ * kirpip onu ZARF olarak kullaniyoruz. Ayirt edici isaret bip sayisi
+ * degil KIRPMA HIZI.
+ * Surekli tonlu parcaya gecilirse: { 250,150 } / { 70,70 } / { 80,80 }
+ * ve burstRepeats 3 / 3 / 0. */
+
 #define BUZZER_MAX_ON_MS   300U
 
 /* Yuksek DAC = FB'ye cok akim = dusuk cikis gerilimi = dusuk ses.
@@ -19,9 +23,9 @@ static const uint16_t buzzer_dac_table[BUZZER_VOL_MAX + 1U] = {
 
 /* Desenler: [0]=ON, [1]=OFF, [2]=ON, [3]=OFF ... dongusel.
  * Eleman sayisi mutlaka cift olmali. */
-uint16_t pat_low[]    = { 2200, 100 };   /* kirpma YOK -> pencere basina 1 uzun bip */
-uint16_t pat_medium[] = {   90,  90 };   /* pencere basina ~2 bip */
-uint16_t pat_high[]   = {   45,  45 };   /* pencere basina ~4 bip */
+static const uint16_t pat_low[]    = { 2200, 100 };   /* kirpma YOK -> pencere basina 1 uzun bip */
+static const uint16_t pat_medium[] = {   90,  90 };   /* pencere basina ~2 bip */
+static const uint16_t pat_high[]   = {   45,  45 };   /* pencere basina ~4 bip */
 
 typedef struct {
     const uint16_t *steps;

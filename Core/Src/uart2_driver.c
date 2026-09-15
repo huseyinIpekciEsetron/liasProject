@@ -148,13 +148,9 @@ void UART2_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
 	if (huart->Instance == USART2)
 	{
-		/* Tampon .ram_d2'de ve non-cacheable oldugu icin invalidate
-		 * artik gereksiz; yine de zararsiz olsun diye biraktik.
-		 * Adim 2 dogrulandiktan sonra silinebilir. */
 
 		if (Size == BMB_FRAME_LEN)
 		{
-			 dbg_rawTotal++;
 			uint8_t next = (uint8_t)((rawHead + 1U) % BMB_RX_SLOTS);
 
 			if (next == rawTail) {
