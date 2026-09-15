@@ -295,7 +295,7 @@ void UART2_ProcessRxFrame(void)
 		if (!(paket->header[0] == 'E' && paket->header[1] == 'S' &&
 			  paket->header[2] == 'E' && paket->header[3] == 0x01 &&
 			  paket->footer[0] == 'O' && paket->footer[1] == 'N')) {
-			return;
+			continue;
 		}
 
 		/* Donanim CRC birimi - yazilimsal 480 iterasyon yerine ~60 cevrim */

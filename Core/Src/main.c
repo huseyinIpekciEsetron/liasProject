@@ -151,6 +151,8 @@ volatile uint16_t dbg_time_year       = 2026;
 
 uint32_t lattime = 0;
 
+volatile uint32_t dbg_loopMaxMs = 0;
+volatile uint32_t dbg_loopCount = 0;
 
 volatile uint8_t dbg_send_sys_status = 0;
 // İşlemci Hataları [0]: Byte 7-8, [1]: Byte 9-10, [2]: Byte 11-12
@@ -358,6 +360,11 @@ int main(void)
     /* USER CODE BEGIN 3 */
   	  uint32_t current_time = HAL_GetTick(); // Sistemin o anki milisaniyesini tek sefer çek
 
+  	  static uint32_t lastLoopMs = 0;
+	  uint32_t loopDt = current_time - lastLoopMs;
+	  lastLoopMs = current_time;
+	  if (loopDt > dbg_loopMaxMs) dbg_loopMaxMs = loopDt;
+	  dbg_loopCount++;
   	  // =========================================================
 	  // GÖREV: KABLO BA�?LANTISI KONTROLÜ (1 Hz -> 1000ms)
 	  // PHY Link Status çok ağır bir işlemdir, saniyede 1 kez sorulur.
