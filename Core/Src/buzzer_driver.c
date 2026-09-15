@@ -19,9 +19,9 @@ static const uint16_t buzzer_dac_table[BUZZER_VOL_MAX + 1U] = {
 
 /* Desenler: [0]=ON, [1]=OFF, [2]=ON, [3]=OFF ... dongusel.
  * Eleman sayisi mutlaka cift olmali. */
-static const uint16_t pat_low[]    = { 150, 1850 };
-static const uint16_t pat_medium[] = { 100,  120, 100, 680 };
-static const uint16_t pat_high[]   = {  80,   80 };
+static const uint16_t pat_low[]    = { 150, 250 };              /* tek bip  */
+static const uint16_t pat_medium[] = { 100, 100, 100, 400 };    /* cift bip */
+static const uint16_t pat_high[]   = {  80,  80 };              /* surekli tren */
 
 typedef struct {
     const uint16_t *steps;
@@ -42,6 +42,7 @@ static AlarmLevel_t current_alarm = ALARM_NONE;
 static uint8_t      userVolume    = 1U;
 static uint8_t      patStep       = 0U;
 static uint32_t     patStepStart  = 0U;
+static uint8_t 		patRepeatsLeft = 0U;   /* 0 = sonsuz */
 
 /* --- ic yardimcilar --------------------------------------------- */
 
@@ -65,6 +66,28 @@ static void Buzzer_ApplyVolume(void)
 }
 
 /* --- API -------------------------------------------------------- */
+
+void Buzzer_Play(AlarmLevel_t level, uint8_t repeats)
+{
+    if (level == ALARM_NONE || level >= ALARM_LEVEL_COUNT) { Buzzer_Stop(); return; }
+
+    current_alarm  = level;
+    patStep        = 0U;
+    patStepStart   = HAL_GetTick();
+    patRepeatsLeft = repeats;
+
+    Buzzer_ApplyVolume();
+    Buzzer_Gate(true);
+}
+
+void Buzzer_Stop(void)
+{
+    current_alarm  = ALARM_NONE;
+    patRepeatsLeft = 0U;
+    Buzzer_Gate(false);
+}
+
+bool Buzzer_IsPlaying(void) { return (current_alarm != ALARM_NONE); }
 
 void Buzzer_Init(DAC_HandleTypeDef *hdac, uint32_t channel)
 {
@@ -101,35 +124,33 @@ void Buzzer_SetVolume(uint8_t user_level)
 
 void Buzzer_SetAlarmLevel(AlarmLevel_t level)
 {
-    if (level >= ALARM_LEVEL_COUNT) return;
-    if (level == current_alarm)     return;   /* her tick cagrilabilir */
-
-    current_alarm = level;
-    patStep       = 0U;
-    patStepStart  = HAL_GetTick();
-
-    if (level == ALARM_NONE) {
-        Buzzer_Gate(false);
-    } else {
-        Buzzer_ApplyVolume();
-        Buzzer_Gate(true);      /* her desen ON adimiyla baslar */
-    }
+	if (level == current_alarm) return;
+	    if (level == ALARM_NONE) Buzzer_Stop();
+	    else                     Buzzer_Play(level, 0U);
 }
 
 void Buzzer_ProcessHandler(void)
 {
-    if (current_alarm == ALARM_NONE) return;
+	if (current_alarm == ALARM_NONE) return;
 
-    const BuzzerPattern_t *p = &buzzer_patterns[current_alarm];
-    uint32_t now = HAL_GetTick();
+	const BuzzerPattern_t *p = &buzzer_patterns[current_alarm];
+	uint32_t now = HAL_GetTick();
 
-    if ((now - patStepStart) >= (uint32_t)p->steps[patStep])
-    {
-        patStepStart = now;
-        patStep++;
-        if (patStep >= p->stepCount) patStep = 0U;
+	if ((now - patStepStart) < (uint32_t)p->steps[patStep]) return;
 
-        /* cift index = ON adimi, tek index = OFF adimi */
-        Buzzer_Gate((patStep & 1U) == 0U);
-    }
+	patStepStart = now;
+	patStep++;
+
+	if (patStep >= p->stepCount)
+	{
+		patStep = 0U;                        /* bir tur tamamlandi */
+
+		if (patRepeatsLeft != 0U)
+		{
+			patRepeatsLeft--;
+			if (patRepeatsLeft == 0U) { Buzzer_Stop(); return; }
+		}
+	}
+
+	Buzzer_Gate((patStep & 1U) == 0U);
 }

@@ -24,20 +24,33 @@ extern "C" {
  * alarm en az bu sure boyunca tutulur. */
 #define ALARM_MIN_HOLD_MS        3000U
 
+#define BURST_REPEATS          3U
+#define CM_ACK_WINDOW_MS   20000U   /* karsi tedbir sonrasi sessizlestirme */
+#define CM_ACK_REMINDER_MS  5000U   /* o pencerede hatirlatma araligi */
+
 static Model* globalModelInstance = nullptr;
 
 uint32_t measured_blast_duration = 0;
 AlarmLevel_t buzzerlevel = ALARM_NONE;
 
-static AlarmLevel_t threatClassToAlarm(TLUS::ThreatClass c)
+struct ThreatResponse {
+    AlarmLevel_t level;
+    bool         continuous;
+    uint32_t     reminderMs;
+};
+
+/* KARAR NOTU: "continuous" olanlar operatorden ANINDA aksiyon
+ * (karsi tedbir + manevra) isteyen siniflardir. Sesin kesilmesi
+ * "durum cozuldu" mesaji verir; LD/LBR icin bu yanlistir. */
+static ThreatResponse classResponse(TLUS::ThreatClass c)
 {
     switch (c)
     {
-        case TLUS::THREAT_LBR:  return ALARM_HIGH;    /* isin surucu */
-        case TLUS::THREAT_LD:   return ALARM_HIGH;    /* isaretleyici */
-        case TLUS::THREAT_LRF:  return ALARM_MEDIUM;  /* mesafe bulucu */
-        case TLUS::THREAT_SRCH: return ALARM_LOW;     /* siniflandirilmamis */
-        default:                return ALARM_LOW;     /* bilinmeyen kod -> yine de uyar */
+        case TLUS::THREAT_LBR:  return { ALARM_HIGH,   true,      0U };
+        case TLUS::THREAT_LD:   return { ALARM_HIGH,   true,      0U };
+        case TLUS::THREAT_LRF:  return { ALARM_MEDIUM, false, 15000U };
+        case TLUS::THREAT_SRCH: return { ALARM_LOW,    false, 30000U };
+        default:                return { ALARM_LOW,    false, 30000U };
     }
 }
 
@@ -291,10 +304,11 @@ void Model::tick()
     /* --- Sesli ikaz --- */
 	processThreatAlarm();
 
-	if (!buzzerManualOverride) {
-		buzzerlevel = threatAlarmLevel;     /* gercek tehdit surusu */
+	if (buzzerManualOverride) {
+		Buzzer_SetAlarmLevel(buzzerlevel);     /* test ekrani */
+	} else {
+		processThreatAlarm();                  /* buzzer'i kendisi surer */
 	}
-	Buzzer_SetAlarmLevel(buzzerlevel);      /* override varsa test ekrani belirler */
 
     processTimeDateContainer();
 
@@ -333,54 +347,76 @@ void Model::processThreatAlarm()
 
     if (!threatDataFresh) { threatDataFresh = true; comm_lost_flag = false; }
 
-    /* --- 2. AKTIF TEHDITLERDEN EN YUKSEK SIDDET --- */
-    AlarmLevel_t worst = ALARM_NONE;
-    bool         sawAgedOut   = false;   /* bu mesajda sonen tehdit var mi */
+    /* --- 2. EN YUKSEK SIDDETLI AKTIF TEHDIT --- */
+	ThreatResponse worst = { ALARM_NONE, false, 0U };
+	bool sawAgedOut = false;
 
-    if (tehdidler.isValid)
-    {
-        uint8_t n = (tehdidler.count > 20U) ? 20U : tehdidler.count;
-
-        for (uint8_t i = 0U; i < n; i++)
-		{
-			if (tehdidler.threats[i].ageOut != 0U) {
-				sawAgedOut = true;       /* TLUS "bu sonuyor" diyor */
-				continue;
-			}
-			AlarmLevel_t lvl = threatClassToAlarm(tehdidler.threats[i].threatClass);
-			if (lvl > worst) worst = lvl;
-		}
-    }
-
-    /* --- 3. MINIMUM OTME SURESI --- */
-    if (worst > ALARM_NONE)
-    {
-        if (worst >= threatAlarmLevel)
-        {
-            /* Yeni tehdit ya da tirmanma: ANINDA uygula, sureyi yenile */
-            threatAlarmLevel = worst;
-            alarmHoldUntilMs = now + ALARM_MIN_HOLD_MS;
-        }
-        else if ((int32_t)(now - alarmHoldUntilMs) >= 0)
-        {
-            /* Hold doldu, dusuk seviyeye inebiliriz */
-            threatAlarmLevel = worst;
-            alarmHoldUntilMs = now + ALARM_MIN_HOLD_MS;
-        }
-        /* aksi halde: hold dolmadi, yuksek seviye korunur */
-    }
-    else if (sawAgedOut)
+	if (tehdidler.isValid)
 	{
-		/* Aktif tehdit kalmadi ve TLUS sonumlemeyi kendisi bildirdi.
-		 * Operator alarmi zaten duydu - hold'u bekletmeye gerek yok. */
-		threatAlarmLevel = ALARM_NONE;
-		alarmHoldUntilMs = now;
+		uint8_t n = (tehdidler.count > 20U) ? 20U : tehdidler.count;
+		for (uint8_t i = 0U; i < n; i++)
+		{
+			if (tehdidler.threats[i].ageOut != 0U) { sawAgedOut = true; continue; }
+
+			ThreatResponse r = classResponse(tehdidler.threats[i].threatClass);
+			if (r.level > worst.level) worst = r;    /* EN KOTUSU KAZANIR */
+		}
 	}
-    else if ((int32_t)(now - alarmHoldUntilMs) >= 0)
-    {
-    	 /* Tehdit ageOut gormeden listeden dustu -> hold uygulanir */
-        threatAlarmLevel = ALARM_NONE;
-    }
+
+	/* --- 3. AKTIF TEHDIT YOKSA SUSTUR --- */
+	if (worst.level == ALARM_NONE)
+	{
+		if (sawAgedOut || (int32_t)(now - alarmHoldUntilMs) >= 0)
+		{
+			threatAlarmLevel = ALARM_NONE;
+			alarmHoldUntilMs = now;
+			lastBurstMs      = 0U;
+			Buzzer_Stop();
+		}
+		return;
+	}
+
+	/* --- 4. SEVIYE DEGISIMI --- */
+	bool levelChanged = false;
+
+	if (worst.level > threatAlarmLevel) {
+		levelChanged = true;                                    /* tirmanma: aninda */
+	} else if (worst.level < threatAlarmLevel &&
+			   (int32_t)(now - alarmHoldUntilMs) >= 0) {
+		levelChanged = true;                                    /* dusus: hold dolunca */
+	}
+
+	if (levelChanged) {
+		threatAlarmLevel = worst.level;
+		lastBurstMs      = 0U;      /* hatirlatmayi hemen tetikle */
+		Buzzer_Stop();              /* eski deseni kes */
+	}
+	alarmHoldUntilMs = now + ALARM_MIN_HOLD_MS;
+
+	/* --- 5. KARSI TEDBIR ONAYI ---
+	 * Operator sis/frag attiysa uyariyi almis ve aksiyon almistir.
+	 * Surekli alarmi gecici olarak hatirlatmaya dusur. Sure dolunca
+	 * tehdit hala varsa surekliye DONER: "duman attim ama hala
+	 * uzerimdeler" ilk uyaridan daha kritik bir bilgidir. */
+	bool cmAck = (lastCounterMeasureMs != 0U) &&
+				 ((now - lastCounterMeasureMs) < CM_ACK_WINDOW_MS);
+
+	/* --- 6. CALDIR --- */
+	if (worst.continuous && !cmAck)
+	{
+		if (!Buzzer_IsPlaying()) {
+			Buzzer_Play(worst.level, 0U);          /* sonsuz dongu */
+		}
+	}
+	else
+	{
+		uint32_t interval = worst.continuous ? CM_ACK_REMINDER_MS : worst.reminderMs;
+
+		if (lastBurstMs == 0U || (now - lastBurstMs) >= interval) {
+			Buzzer_Play(worst.level, BURST_REPEATS);
+			lastBurstMs = now;
+		}
+	}
 }
 
 void Model::setActiveScreen(ActiveScreenType screen)
@@ -390,6 +426,9 @@ void Model::setActiveScreen(ActiveScreenType screen)
     {
         modelListener->onSmokeDataUpdated(tube_states);
     }
+    else if (screen == SCREEN_RADAR && modelListener != 0) {
+	   modelListener->onRadarTargetsReceived(tehdidler);   /* taze veriyle senkronla */
+   }
 }
 
 // ==============================================================
@@ -944,6 +983,7 @@ void Model::processFiringStateMachine()
 			if (rxData.bmb_ready == 0xAA)
 			{
 				currentFiringState = STATE_FIRING;
+				lastCounterMeasureMs = HAL_GetTick();
 				firingTimer = current_time;
 				any_blasting_occurred = false;
 

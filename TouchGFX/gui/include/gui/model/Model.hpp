@@ -368,6 +368,8 @@ private:
 	bool         buzzerManualOverride = false;   /* test ekrani icin */
 
 	void processThreatAlarm();
+	uint32_t lastBurstMs           = 0;
+	uint32_t lastCounterMeasureMs  = 0;
 };
 
 #endif // MODEL_HPP

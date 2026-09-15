@@ -33,6 +33,9 @@ extern "C" {
 void Buzzer_SetVolume(uint8_t volume_level); // 0-10 arası TouchGFX'ten gelen değer
 void Buzzer_Beep(bool state); // Anlık susturma/açma (MUTE) kontrolü
 void Buzzer_SetAlarmLevel(AlarmLevel_t level);
+void Buzzer_Stop(void);
+bool Buzzer_IsPlaying(void);
+void Buzzer_Play(AlarmLevel_t level, uint8_t repeats);
 
 #ifdef __cplusplus
 }
