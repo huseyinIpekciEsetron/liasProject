@@ -131,7 +131,7 @@ uint32_t task_time_buttons  = 0;
 // ========================================================
 #define MAX_DBG_THREATS 5 // Aynı anda test edilecek maksimum hedef sayısı
 
-volatile uint8_t  dbg_threat_count = 4; // Başlangıçta 2 hedef göndersin
+volatile uint8_t  dbg_threat_count = 1; // Başlangıçta 2 hedef göndersin
 
 // Aşağıdaki değişkenleri Live Expressions'a ekleyip yanındaki OK işaretinden genişletin:
 // Index 0 -> 1. Hedef, Index 1 -> 2. Hedef ...
@@ -157,6 +157,10 @@ volatile uint32_t dbg_bmbFps    = 0;   /* BMB cerceve / saniye */
 volatile uint32_t dbg_loopFps   = 0;   /* ana dongu turu / saniye */
 volatile uint32_t dbg_loopMax1s = 0;   /* SON 1 saniyedeki en kotu tur */
 volatile uint32_t dbg_rawTotal = 0;
+volatile uint32_t dbg_loopMaxEver = 0;   /* hic otomatik sifirlanmaz */
+volatile uint32_t dbg_loopOver20  = 0;   /* 20 ms'yi asan tur sayisi */
+volatile uint32_t dbg_ltdcUnderrun = 0;
+volatile uint32_t dbg_ltdcXferErr  = 0;
 
 volatile uint8_t dbg_send_sys_status = 0;
 // İşlemci Hataları [0]: Byte 7-8, [1]: Byte 9-10, [2]: Byte 11-12
@@ -292,6 +296,8 @@ int main(void)
   MX_TouchGFX_Init();
   /* USER CODE BEGIN 2 */
 
+  __HAL_LTDC_ENABLE_IT(&hltdc, LTDC_IT_FU | LTDC_IT_TE);
+
   /*-- LCD Init --*/
   HAL_GPIO_WritePin(LCD_ONOFF_GPIO_Port, LCD_ONOFF_Pin, GPIO_PIN_SET);
 
@@ -368,6 +374,7 @@ int main(void)
 	  if (lastLoopMs != 0U) {                     /* ilk tur artefakt, sayma */
 		  uint32_t loopDt = current_time - lastLoopMs;
 		  if (loopDt > dbg_loopMaxMs) dbg_loopMaxMs = loopDt;
+		  if (loopDt > 20U)             dbg_loopOver20++;
 	  }
 	  lastLoopMs = current_time;
 	  dbg_loopCount++;
@@ -380,6 +387,7 @@ int main(void)
 		dbg_loopMax1s = dbg_loopMaxMs;           /* pencereyi yayinla */
 		dbg_loopMaxMs = 0;                       /* ve sifirla */
 	}
+
 
 
 
@@ -1158,12 +1166,12 @@ static void MX_FMC_Init(void)
   hsdram1.Init.CASLatency = FMC_SDRAM_CAS_LATENCY_2;
   hsdram1.Init.WriteProtection = FMC_SDRAM_WRITE_PROTECTION_DISABLE;
   hsdram1.Init.SDClockPeriod = FMC_SDRAM_CLOCK_PERIOD_2;
-  hsdram1.Init.ReadBurst = FMC_SDRAM_RBURST_DISABLE;
+  hsdram1.Init.ReadBurst = FMC_SDRAM_RBURST_ENABLE;
   hsdram1.Init.ReadPipeDelay = FMC_SDRAM_RPIPE_DELAY_1;
   /* SdramTiming */
   SdramTiming.LoadToActiveDelay = 2;
   SdramTiming.ExitSelfRefreshDelay = 7;
-  SdramTiming.SelfRefreshTime = 4;
+  SdramTiming.SelfRefreshTime = 5;
   SdramTiming.RowCycleDelay = 7;
   SdramTiming.WriteRecoveryTime = 3;
   SdramTiming.RPDelay = 2;
@@ -1346,12 +1354,9 @@ void SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram)
 
     HAL_SDRAM_SendCommand(hsdram, &Command, HAL_MAX_DELAY);
 
-    /* 6. ADIM: Yenileme Hızını (Refresh Rate) Ayarla =================== */
-    /* Hesaplama Formülü: (Refresh Rate (ms) / Satır Sayısı) * FMC Clock - 20
-       Örnek: 64ms / 4096 = 15.62us.
-       FMC Saatin 200 MHz ise: 15.62 * 200 - 20 = 3104
-       Güvenli ve hızlı çalışması için 3104 değerini kullanıyoruz. */
-    HAL_SDRAM_ProgramRefreshRate(hsdram, 3104);
+    /* IS42S16400J: 4096 satir / 64 ms, SDCLK = 100 MHz
+         * (64e-3 / 4096) * 100e6 - 20 = 1542 */
+    HAL_SDRAM_ProgramRefreshRate(hsdram, 1542);
 }
 
 void Set_LCD_Brightness(uint8_t value)
@@ -1383,6 +1388,11 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
     {
         UART2_ErrorCallback(huart); // BMB Hatalarını Oraya Gönder
     }
+}
+void HAL_LTDC_ErrorCallback(LTDC_HandleTypeDef *hltdc_ptr)
+{
+    if (__HAL_LTDC_GET_FLAG(hltdc_ptr, LTDC_FLAG_FU)) dbg_ltdcUnderrun++;
+    if (__HAL_LTDC_GET_FLAG(hltdc_ptr, LTDC_FLAG_TE)) dbg_ltdcXferErr++;
 }
 
 void Hardware_Transmit_Data(uint8_t* data, uint16_t length)
