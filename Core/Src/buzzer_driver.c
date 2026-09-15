@@ -37,12 +37,12 @@ static const BuzzerPattern_t buzzer_patterns[ALARM_LEVEL_COUNT] = {
 };
 
 static DAC_HandleTypeDef *buzzer_dac;
-static uint32_t     buzzer_dac_channel;
-static AlarmLevel_t current_alarm = ALARM_NONE;
-static uint8_t      userVolume    = 1U;
-static uint8_t      patStep       = 0U;
-static uint32_t     patStepStart  = 0U;
-static uint8_t 		patRepeatsLeft = 0U;   /* 0 = sonsuz */
+static uint32_t buzzer_dac_channel;
+static volatile AlarmLevel_t current_alarm = ALARM_NONE;
+static uint8_t userVolume    = 1U;
+static volatile uint8_t patStep       = 0U;
+static volatile uint16_t patStepElapsed = 0U;
+static volatile uint8_t patRepeatsLeft = 0U;   /* 0 = sonsuz */
 
 /* --- ic yardimcilar --------------------------------------------- */
 
@@ -75,7 +75,7 @@ void Buzzer_Play(AlarmLevel_t level, uint8_t repeats)
 	__disable_irq();
 	current_alarm  = level;
 	patStep        = 0U;
-	patStepStart   = HAL_GetTick();
+	patStepElapsed = 0U;
 	patRepeatsLeft = repeats;
 	__set_PRIMASK(primask);
 
@@ -141,17 +141,16 @@ void Buzzer_ProcessHandler(void)
 	if (current_alarm == ALARM_NONE) return;
 
 	const BuzzerPattern_t *p = &buzzer_patterns[current_alarm];
-	uint32_t now = HAL_GetTick();
 
-	if ((now - patStepStart) < (uint32_t)p->steps[patStep]) return;
+	/* 1 kHz timer'dan cagriliyoruz - her cagri tam 1 ms */
+	if (++patStepElapsed < p->steps[patStep]) return;
 
-	patStepStart = now;
+	patStepElapsed = 0U;
 	patStep++;
 
 	if (patStep >= p->stepCount)
 	{
-		patStep = 0U;                        /* bir tur tamamlandi */
-
+		patStep = 0U;
 		if (patRepeatsLeft != 0U)
 		{
 			patRepeatsLeft--;

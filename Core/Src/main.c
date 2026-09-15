@@ -337,6 +337,7 @@ int main(void)
 
   /*-- Buzzer Init --*/
   Buzzer_Init(&hdac1, DAC_CHANNEL_1);
+  HAL_TIM_Base_Start_IT(&htim7);
 
   /*-- RTC Init --*/
   RTC_Init(&hrtc);
