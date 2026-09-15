@@ -339,6 +339,18 @@ int main(void)
   Buzzer_Init(&hdac1, DAC_CHANNEL_1);
   HAL_TIM_Base_Start_IT(&htim7);
 
+  /* ===== GECICI: uzun ara sonrasi faz deterministik mi? ===== */
+     /* 10 kez: 300 ms ses, 3 sn sessizlik.
+      * 3 sn, dahili osilatorun (750 ms periyot) sifirlanmasi icin
+      * fazlasiyla yeterli olmali. */
+     for (int i = 0; i < 10; i++)
+     {
+         HAL_GPIO_WritePin(BUZZER_MUTE_GPIO_Port, BUZZER_MUTE_Pin, GPIO_PIN_SET);
+         HAL_Delay(300);
+         HAL_GPIO_WritePin(BUZZER_MUTE_GPIO_Port, BUZZER_MUTE_Pin, GPIO_PIN_RESET);
+         HAL_Delay(3000);
+     }
+
   /*-- RTC Init --*/
   RTC_Init(&hrtc);
 
@@ -358,6 +370,8 @@ int main(void)
   task_time_can_log = HAL_GetTick();
   task_time_buttons = HAL_GetTick();
   task_time_bmb_uart = HAL_GetTick();
+
+
 
   MX_IWDG1_Init();
 

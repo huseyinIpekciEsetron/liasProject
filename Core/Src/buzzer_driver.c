@@ -19,21 +19,22 @@ static const uint16_t buzzer_dac_table[BUZZER_VOL_MAX + 1U] = {
 
 /* Desenler: [0]=ON, [1]=OFF, [2]=ON, [3]=OFF ... dongusel.
  * Eleman sayisi mutlaka cift olmali. */
-static const uint16_t pat_low[]    = { 150, 250 };              /* tek bip  */
-static const uint16_t pat_medium[] = { 100, 100, 100, 400 };    /* cift bip */
-static const uint16_t pat_high[]   = {  80,  80 };              /* surekli tren */
+uint16_t pat_low[]    = { 2200, 100 };   /* kirpma YOK -> pencere basina 1 uzun bip */
+uint16_t pat_medium[] = {   90,  90 };   /* pencere basina ~2 bip */
+uint16_t pat_high[]   = {   45,  45 };   /* pencere basina ~4 bip */
 
 typedef struct {
     const uint16_t *steps;
     uint8_t         stepCount;
-    uint8_t         minVolume;   /* bu seviyede zorunlu alt sinir */
+    uint8_t         burstRepeats;   /* 0 = sonsuz (HIGH icin) */
+    uint8_t         minVolume;
 } BuzzerPattern_t;
 
 static const BuzzerPattern_t buzzer_patterns[ALARM_LEVEL_COUNT] = {
-    [ALARM_NONE]   = { NULL,        0U, 0U },
-    [ALARM_LOW]    = { pat_low,     2U, 1U },
-    [ALARM_MEDIUM] = { pat_medium,  4U, 2U },
-    [ALARM_HIGH]   = { pat_high,    2U, 4U }
+    [ALARM_NONE]   = { NULL,        0U,  0U, 0U },
+    [ALARM_LOW]    = { pat_low,     2U,  1U, 2U },   /* 1 tur  ≈ 2,3 sn */
+    [ALARM_MEDIUM] = { pat_medium,  2U, 15U, 3U },   /* 15 tur ≈ 2,7 sn */
+    [ALARM_HIGH]   = { pat_high,    2U,  0U, 5U }    /* sonsuz           */
 };
 
 static DAC_HandleTypeDef *buzzer_dac;
@@ -71,12 +72,15 @@ void Buzzer_Play(AlarmLevel_t level, uint8_t repeats)
 {
 	if (level == ALARM_NONE || level >= ALARM_LEVEL_COUNT) { Buzzer_Stop(); return; }
 
+	/* repeats == 0 -> tablodaki varsayilani kullan */
+	uint8_t r = (repeats != 0U) ? repeats : buzzer_patterns[level].burstRepeats;
+
 	uint32_t primask = __get_PRIMASK();
 	__disable_irq();
 	current_alarm  = level;
 	patStep        = 0U;
 	patStepElapsed = 0U;
-	patRepeatsLeft = repeats;
+	patRepeatsLeft = r;
 	__set_PRIMASK(primask);
 
 	Buzzer_ApplyVolume();

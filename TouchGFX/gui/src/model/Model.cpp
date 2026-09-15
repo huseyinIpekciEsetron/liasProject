@@ -12,7 +12,6 @@ extern "C" {
     void Set_LCD_Brightness(uint8_t value);
     extern volatile uint8_t radar_flag;
 	void Hardware_Transmit_Data(uint8_t* data, uint16_t length);
-
 }
 
 /* ICD: tehdit mesaji 40 ms periyotlu. 250 ms ~ 6 kacirilmis mesaj.
@@ -301,7 +300,7 @@ void Model::tick()
 
     // buzzer
     /* --- Sesli ikaz --- */
-	if (buzzerManualOverride) {
+    if (buzzerManualOverride) {
 		Buzzer_SetAlarmLevel(buzzerlevel);     /* test ekrani */
 	} else {
 		processThreatAlarm();                  /* buzzer'i kendisi surer */
@@ -423,7 +422,7 @@ void Model::processThreatAlarm()
 		uint32_t interval = worst.continuous ? CM_ACK_REMINDER_MS : worst.reminderMs;
 
 		if (lastBurstMs == 0U || (now - lastBurstMs) >= interval) {
-			Buzzer_Play(worst.level, BURST_REPEATS);
+			Buzzer_Play(worst.level, 0U);
 			lastBurstMs = now;
 		}
 	}
