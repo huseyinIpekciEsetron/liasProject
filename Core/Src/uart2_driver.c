@@ -12,12 +12,17 @@
 extern CRC_HandleTypeDef hcrc;          /* main.c'de tanimli, su ana kadar kullanilmiyordu */
 
 #define BMB_FRAME_LEN   64U
+#define BMB_RX_SLOTS  4U
 
 /* ISR ile ana dongu arasindaki tek paylasim noktasi.
  * ISR yalnizca buraya yazar; dogrulama ana donguye ait. */
 static volatile uint8_t  rawFrame[BMB_FRAME_LEN];
 static volatile bool     rawFrameReady = false;
 static volatile uint32_t rawFrameDropped = 0U;   /* teshis sayaci */
+
+static volatile uint8_t rawRing[BMB_RX_SLOTS][BMB_FRAME_LEN];
+static volatile uint8_t rawHead = 0U;   /* yalnizca ISR yazar */
+static volatile uint8_t rawTail = 0U;   /* yalnizca ana dongu yazar */
 
 // MPU ayarlarında Non-Cacheable yaptığın SRAM alanına yerleştiriyoruz
 #if defined ( __GNUC__ )
@@ -147,11 +152,16 @@ void UART2_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 
 		if (Size == BMB_FRAME_LEN)
 		{
-			if (rawFrameReady) {
-				rawFrameDropped++;      /* ana dongu yetisememis - teshis icin say */
+			uint8_t next = (uint8_t)((rawHead + 1U) % BMB_RX_SLOTS);
+
+			if (next == rawTail) {
+				rawFrameDropped++;              /* kuyruk gercekten doldu */
 			}
-			memcpy((void *)rawFrame, uart2_rx_buffer, BMB_FRAME_LEN);
-			rawFrameReady = true;       /* SON yazilan: yayinlama noktasi */
+			else {
+				memcpy((void *)rawRing[rawHead], uart2_rx_buffer, BMB_FRAME_LEN);
+				__DMB();                        /* veri, indeksten once gorunur olsun */
+				rawHead = next;
+			}
 		}
 
 		HAL_UARTEx_ReceiveToIdle_DMA(UART2_huartx, uart2_rx_buffer, UART2_RX_BUFFER_SIZE);
@@ -271,40 +281,37 @@ void BMB_Set_Tx_Command(bool power_ready, uint16_t sis_mask, uint16_t frag_mask)
  */
 void UART2_ProcessRxFrame(void)
 {
-    if (!rawFrameReady) return;
-
-    uint8_t local[BMB_FRAME_LEN] __attribute__((aligned(4)));
-
-    /* Kisa kritik bolum: 64 bayt kopyalarken ISR araya girmesin.
-     * ~100 ns surer, kesme gecikmesine etkisi ihmal edilebilir. */
-    uint32_t primask = __get_PRIMASK();
-    __disable_irq();
-    memcpy(local, (const void *)rawFrame, BMB_FRAME_LEN);
-    rawFrameReady = false;
-    __set_PRIMASK(primask);
-
-    /* --- Bundan sonrasi tamamen ana dongu baglaminda --- */
-    BMB_RxPacket_t *paket = (BMB_RxPacket_t *)local;
-
-    if (!(paket->header[0] == 'E' && paket->header[1] == 'S' &&
-          paket->header[2] == 'E' && paket->header[3] == 0x01 &&
-          paket->footer[0] == 'O' && paket->footer[1] == 'N')) {
-        return;
-    }
-
-    /* Donanim CRC birimi - yazilimsal 480 iterasyon yerine ~60 cevrim */
-    uint32_t hesaplanan = HAL_CRC_Calculate(&hcrc, (uint32_t *)local, 60U);
-
-    uint32_t gelen = ((uint32_t)local[60] << 24) |
-                     ((uint32_t)local[61] << 16) |
-                     ((uint32_t)local[62] <<  8) |
-                     ((uint32_t)local[63]);
-
-    if (hesaplanan == gelen)
+	while (rawTail != rawHead)
 	{
-		memcpy(&Validated_Rx_Packet, paket, sizeof(BMB_RxPacket_t));
-		new_bmb_data_flag = true;
-		last_valid_rx_ms  = HAL_GetTick();   /* gercek varis zamani */
+		uint8_t local[BMB_FRAME_LEN] __attribute__((aligned(4)));
+
+		__DMB();
+		memcpy(local, (const void *)rawRing[rawTail], BMB_FRAME_LEN);
+		rawTail = (uint8_t)((rawTail + 1U) % BMB_RX_SLOTS);
+
+		/* --- Bundan sonrasi tamamen ana dongu baglaminda --- */
+		BMB_RxPacket_t *paket = (BMB_RxPacket_t *)local;
+
+		if (!(paket->header[0] == 'E' && paket->header[1] == 'S' &&
+			  paket->header[2] == 'E' && paket->header[3] == 0x01 &&
+			  paket->footer[0] == 'O' && paket->footer[1] == 'N')) {
+			return;
+		}
+
+		/* Donanim CRC birimi - yazilimsal 480 iterasyon yerine ~60 cevrim */
+		uint32_t hesaplanan = HAL_CRC_Calculate(&hcrc, (uint32_t *)local, 60U);
+
+		uint32_t gelen = ((uint32_t)local[60] << 24) |
+						 ((uint32_t)local[61] << 16) |
+						 ((uint32_t)local[62] <<  8) |
+						 ((uint32_t)local[63]);
+
+		if (hesaplanan == gelen)
+		{
+			memcpy(&Validated_Rx_Packet, paket, sizeof(BMB_RxPacket_t));
+			new_bmb_data_flag = true;
+			last_valid_rx_ms  = HAL_GetTick();   /* gercek varis zamani */
+		}
 	}
 }
 uint32_t BMB_Get_Last_Valid_Rx_Time(void)
