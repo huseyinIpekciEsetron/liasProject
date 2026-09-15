@@ -491,6 +491,30 @@ void Screen1View::freeThreatSlot(int slotIndex)
 
 void Screen1View::updateTargets(const TLUS::ThreatMessagePayload& payload)
 {
+	/* --- 0. ARTIK LISTEDE OLMAYAN SLOTLARI SONDUR -----------------
+	 * ICD, bir tehdidin kaybolmadan once mutlaka ageOut=1 ile
+	 * gelecegini garanti etmiyor (o tek mesaj da kaybolabilir).
+	 * Listeden dusen her slot icin fade baslatiyoruz, aksi halde
+	 * ekranda hayalet tehdit kalir. */
+	int n = payload.count;
+	if (n > 20) n = 20;
+
+	for (int i = 0; i < MAX_TARGETS; i++)
+	{
+		if (currentThreatNumbers[i] == -1) continue;
+
+		bool stillPresent = false;
+		for (int t = 0; t < n; t++) {
+			if ((int)payload.threats[t].threatNumber == currentThreatNumbers[i]) {
+				stillPresent = true;
+				break;
+			}
+		}
+
+		if (!stillPresent && presenter->getFadeTicksRemaining(i) < 0) {
+			presenter->setFadeTicksRemaining(i, FADE_DURATION_MS);
+		}
+	}
 	// Paket içindeki hedef sayısı kadar dön
 	for (int t = 0; t < payload.count; t++)
 	{

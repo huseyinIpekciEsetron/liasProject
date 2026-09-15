@@ -326,7 +326,10 @@ int main(void)
   /*-- RTC Init --*/
   RTC_Init(&hrtc);
 
-  while(LP5036_SetColor(3, 255) != LP5036_OK);
+  bool led_ok = false;
+  for (uint8_t retry = 0; retry < 3U && !led_ok; retry++) {
+      led_ok = (LP5036_SetColor(3, 255) == LP5036_OK);
+  }
 
 
   /* --- buton ledlerinin başlatılması --- */
@@ -1381,8 +1384,7 @@ void Debug_Data_Injector(void)
     {
         lattime = HAL_GetTick();
 
-        // Eğer hedef sayısı 0 ise hiç paket gönderme
-        if (dbg_threat_count == 0) return;
+
 
         // Güvenlik: Maksimum 5 hedef ayarladık
         uint8_t count = dbg_threat_count;

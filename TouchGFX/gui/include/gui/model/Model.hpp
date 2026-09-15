@@ -222,6 +222,8 @@ public:
 	int getLogHead() const { return logHead; }
 	LogEntry getLog(int index) const; // Arayüzün okuyacağı fonksiyon
 
+	 void setBuzzerOverride(bool on) { buzzerManualOverride = on; }
+
 protected:
     ModelListener* modelListener;
     uint16_t azimuth = 0;
@@ -357,6 +359,15 @@ private:
 
 	bool timeUpdated = false;
 	PendingAction pendingAction = ACTION_NONE;
+
+	 /* --- Tehdit kaynakli sesli ikaz --- */
+	AlarmLevel_t threatAlarmLevel   = ALARM_NONE;
+	uint32_t     lastThreatMsgMs    = 0;
+	uint32_t     alarmHoldUntilMs   = 0;
+	bool         threatDataFresh    = false;
+	bool         buzzerManualOverride = false;   /* test ekrani icin */
+
+	void processThreatAlarm();
 };
 
 #endif // MODEL_HPP

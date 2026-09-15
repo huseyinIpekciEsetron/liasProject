@@ -15,10 +15,31 @@ extern "C" {
 
 }
 
+/* ICD: tehdit mesaji 40 ms periyotlu. 250 ms ~ 6 kacirilmis mesaj.
+ * UDP jitter'ina tolerans birakiyor ama operatoru uzun sure
+ * bayat veriyle bas basa birakmiyor. */
+#define THREAT_STALE_TIMEOUT_MS   250U
+
+/* Tehdit 100 ms surup kaybolsa bile operator duysun diye
+ * alarm en az bu sure boyunca tutulur. */
+#define ALARM_MIN_HOLD_MS        3000U
+
 static Model* globalModelInstance = nullptr;
 
 uint32_t measured_blast_duration = 0;
 AlarmLevel_t buzzerlevel = ALARM_NONE;
+
+static AlarmLevel_t threatClassToAlarm(TLUS::ThreatClass c)
+{
+    switch (c)
+    {
+        case TLUS::THREAT_LBR:  return ALARM_HIGH;    /* isin surucu */
+        case TLUS::THREAT_LD:   return ALARM_HIGH;    /* isaretleyici */
+        case TLUS::THREAT_LRF:  return ALARM_MEDIUM;  /* mesafe bulucu */
+        case TLUS::THREAT_SRCH: return ALARM_LOW;     /* siniflandirilmamis */
+        default:                return ALARM_LOW;     /* bilinmeyen kod -> yine de uyar */
+    }
+}
 
 Model::Model() : modelListener(0), isBlackoutMode(false), savedBrightnessPWM(60), currentBrightness(3), currentVolume(1)
 {
@@ -266,14 +287,100 @@ void Model::tick()
     // 6. Sürekli Cihaz İçi Test (CBIT)
     processCBIT();
 
-    // Test
-    Buzzer_SetAlarmLevel(buzzerlevel);
+    // buzzer
+    /* --- Sesli ikaz --- */
+	processThreatAlarm();
+
+	if (!buzzerManualOverride) {
+		buzzerlevel = threatAlarmLevel;     /* gercek tehdit surusu */
+	}
+	Buzzer_SetAlarmLevel(buzzerlevel);      /* override varsa test ekrani belirler */
 
     processTimeDateContainer();
 
     processWarnings();
 
 
+}
+
+void Model::processThreatAlarm()
+{
+    uint32_t now = HAL_GetTick();
+
+    /* --- 1. TAZELIK: TLUS tehdit akisi kesildi mi? --- */
+    if ((now - lastThreatMsgMs) > THREAT_STALE_TIMEOUT_MS)
+    {
+        if (threatDataFresh)          /* yeni kopus - bir kere tetikle */
+        {
+            threatDataFresh   = false;
+            tehdidler.isValid = false;
+            tehdidler.count   = 0;
+            comm_lost_flag    = true;
+
+            dispatchWarning(WARN_COMM_LOST);
+
+            if (modelListener != 0 && currentScreen == SCREEN_RADAR) {
+                modelListener->onRadarTargetsReceived(tehdidler);  /* radari temizle */
+            }
+        }
+
+        /* Veri yokken tehdit alarmi CALMAZ; bunun yerine gorsel
+         * "ILETISIM KOPTU" hatasi aktif kalir. Bayat veriyle
+         * otmek, otmemekten daha tehlikeli. */
+        threatAlarmLevel = ALARM_NONE;
+        return;
+    }
+
+    if (!threatDataFresh) { threatDataFresh = true; comm_lost_flag = false; }
+
+    /* --- 2. AKTIF TEHDITLERDEN EN YUKSEK SIDDET --- */
+    AlarmLevel_t worst = ALARM_NONE;
+    bool         sawAgedOut   = false;   /* bu mesajda sonen tehdit var mi */
+
+    if (tehdidler.isValid)
+    {
+        uint8_t n = (tehdidler.count > 20U) ? 20U : tehdidler.count;
+
+        for (uint8_t i = 0U; i < n; i++)
+		{
+			if (tehdidler.threats[i].ageOut != 0U) {
+				sawAgedOut = true;       /* TLUS "bu sonuyor" diyor */
+				continue;
+			}
+			AlarmLevel_t lvl = threatClassToAlarm(tehdidler.threats[i].threatClass);
+			if (lvl > worst) worst = lvl;
+		}
+    }
+
+    /* --- 3. MINIMUM OTME SURESI --- */
+    if (worst > ALARM_NONE)
+    {
+        if (worst >= threatAlarmLevel)
+        {
+            /* Yeni tehdit ya da tirmanma: ANINDA uygula, sureyi yenile */
+            threatAlarmLevel = worst;
+            alarmHoldUntilMs = now + ALARM_MIN_HOLD_MS;
+        }
+        else if ((int32_t)(now - alarmHoldUntilMs) >= 0)
+        {
+            /* Hold doldu, dusuk seviyeye inebiliriz */
+            threatAlarmLevel = worst;
+            alarmHoldUntilMs = now + ALARM_MIN_HOLD_MS;
+        }
+        /* aksi halde: hold dolmadi, yuksek seviye korunur */
+    }
+    else if (sawAgedOut)
+	{
+		/* Aktif tehdit kalmadi ve TLUS sonumlemeyi kendisi bildirdi.
+		 * Operator alarmi zaten duydu - hold'u bekletmeye gerek yok. */
+		threatAlarmLevel = ALARM_NONE;
+		alarmHoldUntilMs = now;
+	}
+    else if ((int32_t)(now - alarmHoldUntilMs) >= 0)
+    {
+    	 /* Tehdit ageOut gormeden listeden dustu -> hold uygulanir */
+        threatAlarmLevel = ALARM_NONE;
+    }
 }
 
 void Model::setActiveScreen(ActiveScreenType screen)
@@ -1113,11 +1220,22 @@ void Model::onTimeDataParsed(const TLUS::TimeData& time)
 // ICD'den Tehdit Bilgisi Yakalanınca
 void Model::onThreatsParsed(const TLUS::ThreatMessagePayload& payload)
 {
-	if(payload.isValid)
+	/* Gecerli olsun olmasin, mesajin GELDIGI bilgisi tazelik icin degerli */
+	lastThreatMsgMs = HAL_GetTick();
+	threatDataFresh = true;
+
+	if (payload.isValid)
 	{
 		tehdidler = payload;
-		threatsUpdated = true;
 	}
+	else
+	{
+		/* TLUS "tehdit bilgilerim guvenilir degil" diyor.
+		 * Eski listeyi TUTMA - operatore hayalet tehdit gosterme. */
+		tehdidler.isValid = false;
+		tehdidler.count   = 0;
+	}
+	threatsUpdated = true;
 
 }
 

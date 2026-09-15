@@ -56,6 +56,7 @@ void Screen5View::tearDownScreen()
 		}
 		else if (selectedIndex == TEST_BUZZER) {
 			presenter->setBuzzerLevel(ALARM_NONE);
+			presenter->setBuzzerOverride(false);
 			presenter->saveVolume(currentVolume);
 		}
 	}
@@ -177,6 +178,7 @@ void Screen5View::handleTickEvent()
             {
                 if (buzzerTestStep != 0)
                 {
+                	 presenter->setBuzzerOverride(true);     /* teste girerken */
                     // 1. BEKLEME (ES VERME) VE BAŞLATMA MANTIĞI
                     if (testPauseCounter > 0) {
                         testPauseCounter--;
@@ -209,6 +211,7 @@ void Screen5View::handleTickEvent()
 
                         // SESİ KAPAT (ES VER!)
                         presenter->setBuzzerLevel(ALARM_NONE);
+                        presenter->setBuzzerOverride(false);
 
                         if (buzzerTestStep <= 3) {
                             testPauseCounter = 90; // SESSİZLİK
@@ -225,6 +228,7 @@ void Screen5View::handleTickEvent()
 
                             // Test Bitti Moduna Geç!
                             currentState = STATE_TEST_FINISHED;
+                            presenter->setBuzzerOverride(false);
                         }
                     }
                 }
@@ -460,6 +464,7 @@ void Screen5View::runSelectedTest()
 			// Sesi fulle ama henüz çalma (Sessizlikle başla)
 			presenter->saveVolume(5);
 			presenter->setBuzzerLevel(ALARM_NONE);
+			presenter->setBuzzerOverride(false);
             break;
 
         case 3: // BUTON / ŞALTER TESTİ
@@ -514,6 +519,7 @@ void Screen5View::stopCurrentTest()
     else if(selectedIndex == TEST_BUZZER)
     {
     	presenter->setBuzzerLevel(ALARM_NONE);
+    	presenter->setBuzzerOverride(false);
 		presenter->saveVolume(currentVolume);
 		buzzerTestStep = 0;
     }

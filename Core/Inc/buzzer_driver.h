@@ -16,8 +16,12 @@ typedef enum {
     ALARM_NONE = 0,   // Sessiz
     ALARM_LOW,        // Yavaş Bip (Örn: Saniyede 1)
     ALARM_MEDIUM,     // Hızlı Bip (Örn: Saniyede 3)
-    ALARM_HIGH        // Sürekli Kesintisiz Bip (Kilitlenme/Vurulma)
+    ALARM_HIGH,        // Sürekli Kesintisiz Bip (Kilitlenme/Vurulma)
+	ALARM_LEVEL_COUNT
 } AlarmLevel_t;
+
+#define BUZZER_VOL_MIN   1U
+#define BUZZER_VOL_MAX   5U
 
 // Sürücü Fonksiyonları
 void Buzzer_Init(DAC_HandleTypeDef *hdac, uint32_t channel);

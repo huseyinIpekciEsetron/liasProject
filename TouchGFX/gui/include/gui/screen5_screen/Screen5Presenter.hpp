@@ -27,6 +27,7 @@ public:
     virtual void onBrightnessMenuPressed() override; // BACK
     virtual void onHardwareButtonStateChanged(uint32_t state) override;
 
+
     // Modelden Gelen Sistem Uyarıları (Popup)
     virtual void onShowWarning(Model::WarningType warning, int tubeIndex) override;
     virtual void onTimeDateUpdated(const TLUS::TimeData& time) override;
@@ -53,6 +54,7 @@ public:
 	Model::BmbTelemetryData getBmbTelemetry();
 	Model::CommTelemetryData getCommTelemetry();
 	bool getCommLostFlag();
+	void setBuzzerOverride(bool on) { model->setBuzzerOverride(on); }
 
 private:
     Screen5Presenter();
