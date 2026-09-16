@@ -55,6 +55,9 @@ public:
 	bool getFaultIsFrag(int index);
 	bool getCommLostFlag();
 	bool getHwErrorFlag();
+	bool getTlusCommLostFlag();
+	bool getTlusSwDeadFlag();
+	bool getTlusFrozenFlag();
 
 	// --- ADD THESE NEW FUNCTIONS ---
 	int getFadeTicksRemaining(int index);

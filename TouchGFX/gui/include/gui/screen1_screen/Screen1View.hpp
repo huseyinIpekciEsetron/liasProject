@@ -72,7 +72,8 @@ protected:
 		touchgfx::TypedTextId textId;
 		int tubeIndex;
 	};
-	ActiveFault activeFaults[18];
+	static const int MAX_ACTIVE_FAULTS = 100;
+	ActiveFault activeFaults[MAX_ACTIVE_FAULTS];
 	int activeFaultCount = 0;
 	int currentTickerIndex = -1;
 	int faultCheckTimer = 0;
@@ -86,6 +87,7 @@ protected:
 	void buildFaultList();
 	void showNextFaultInTicker();
     void updateTickerText();
+    void addFault(touchgfx::TypedTextId id, int idx);
 
 };
 

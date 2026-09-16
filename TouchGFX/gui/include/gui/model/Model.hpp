@@ -198,6 +198,9 @@ public:
 	uint16_t getTubeFaultTime(int index) { return tubeFaultTime[index]; }
 	uint16_t getCommFaultTime() { return commFaultTime; }
 	uint16_t getHwFaultTime() { return hwFaultTime; }
+	bool getTlusCommLostFlag() const { return tlus_comm_lost_flag; }
+	bool getTlusSwDeadFlag()   const { return tlusSwDeadFlag; }
+	bool getTlusFrozenFlag()   const { return tlusFrozenFlag; }
 
 	// =======================================================
 	// EKRAN İÇİN DİNAMİK LOG (KAYIT) MİMARİSİ

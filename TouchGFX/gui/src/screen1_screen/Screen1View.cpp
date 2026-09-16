@@ -674,58 +674,77 @@ void Screen1View::showWarningPopup(Model::WarningType warning, int tubeIndex)
     warningPopupContainer.showWarningMessage(warning, tubeIndex);
 }
 
+void Screen1View::addFault(touchgfx::TypedTextId id, int idx)
+{
+    if (activeFaultCount < MAX_ACTIVE_FAULTS) {
+        addFault( id, idx );
+    }
+}
+
 void Screen1View::buildFaultList()
 {
     activeFaultCount = 0;
 
     // Kritik Hatalar
-    if (presenter->getCommLostFlag()) activeFaults[activeFaultCount++] = { T_WARNCOMMERR, -1 };
-    if (presenter->getHwErrorFlag()) activeFaults[activeFaultCount++] = { T_WARNVOLTAGE, -1 };
+    if (presenter->getCommLostFlag()) addFault( T_WARNCOMMERR, -1 );
+    if (presenter->getHwErrorFlag()) addFault( T_WARNVOLTAGE, -1 );
+
+    /* TLUS baglanti durumu. Bunlar BMB arizalarindan ayri tutulur:
+	 * BMB kopunca ates edilemez, TLUS kopunca tehdit gorulemez. */
+	bool tlusDown = presenter->getTlusCommLostFlag();
+	if (tlusDown)                         addFault(T_WARNTLUSCOMM,   -1);
+	if (presenter->getTlusSwDeadFlag())   addFault(T_WARNTLUSSW,     -1);
+	if (presenter->getTlusFrozenFlag())   addFault(T_WARNTLUSFROZEN, -1);
 
     // SADECE AKTİF SİSTEM VE SENSÖR HATALARINI OKUYORUZ
-    TLUS::SystemStatusPayload status = presenter->getActiveSystemStatus();
+	 if (!tlusDown)
+	{
+		 TLUS::SystemStatusPayload status = presenter->getActiveSystemStatus();
 
-    if (status.processorFaults.ramTesti) activeFaults[activeFaultCount++] = { T_FLT_PROC_RAM, -1 };
-    if (status.processorFaults.kaliciBellekTesti) activeFaults[activeFaultCount++] = { T_FLT_PROC_NVRAM, -1 };
-    if (status.processorFaults.bellekDosyasiTesti) activeFaults[activeFaultCount++] = { T_FLT_PROC_MEMFILE, -1 };
-    if (status.processorFaults.nvsramTesti) activeFaults[activeFaultCount++] = { T_FLT_PROC_NVSRAM, -1 };
-    if (status.processorFaults.bellekDoluluk) activeFaults[activeFaultCount++] = { T_FLT_PROC_MEMFULL, -1 };
-    if (status.processorFaults.seriKanal1) activeFaults[activeFaultCount++] = { T_FLT_PROC_SER1, -1 };
-    if (status.processorFaults.seriKanal2) activeFaults[activeFaultCount++] = { T_FLT_PROC_SER2, -1 };
-    if (status.processorFaults.seriKanal3) activeFaults[activeFaultCount++] = { T_FLT_PROC_SER3, -1 };
-    if (status.processorFaults.seriKanal4) activeFaults[activeFaultCount++] = { T_FLT_PROC_SER4, -1 };
-    if (status.processorFaults.arayuzKarti) activeFaults[activeFaultCount++] = { T_FLT_PROC_IFACE, -1 };
-    if (status.processorFaults.anaBesleme) activeFaults[activeFaultCount++] = { T_FLT_PROC_PWR, -1 };
-    if (status.processorFaults.islemciDurumuKapanma) activeFaults[activeFaultCount++] = { T_FLT_PROC_SHUTDOWN, -1 };
-    if (status.processorFaults.gucKartiSeriKanal) activeFaults[activeFaultCount++] = { T_FLT_PROC_PWR_SER, -1 };
-    if (status.processorFaults.sicaklikEsikAsimi) activeFaults[activeFaultCount++] = { T_FLT_PROC_TEMP, -1 };
+		if (status.processorFaults.ramTesti) addFault( T_FLT_PROC_RAM, -1 );
+		if (status.processorFaults.kaliciBellekTesti) addFault( T_FLT_PROC_NVRAM, -1 );
+		if (status.processorFaults.bellekDosyasiTesti) addFault( T_FLT_PROC_MEMFILE, -1 );
+		if (status.processorFaults.nvsramTesti) addFault( T_FLT_PROC_NVSRAM, -1 );
+		if (status.processorFaults.bellekDoluluk) addFault( T_FLT_PROC_MEMFULL, -1 );
+		if (status.processorFaults.seriKanal1) addFault( T_FLT_PROC_SER1, -1 );
+		if (status.processorFaults.seriKanal2) addFault( T_FLT_PROC_SER2, -1 );
+		if (status.processorFaults.seriKanal3) addFault( T_FLT_PROC_SER3, -1 );
+		if (status.processorFaults.seriKanal4) addFault( T_FLT_PROC_SER4, -1 );
+		if (status.processorFaults.arayuzKarti) addFault( T_FLT_PROC_IFACE, -1 );
+		if (status.processorFaults.anaBesleme) addFault( T_FLT_PROC_PWR, -1 );
+		if (status.processorFaults.islemciDurumuKapanma) addFault( T_FLT_PROC_SHUTDOWN, -1 );
+		if (status.processorFaults.gucKartiSeriKanal) addFault( T_FLT_PROC_PWR_SER, -1 );
+		if (status.processorFaults.sicaklikEsikAsimi) addFault( T_FLT_PROC_TEMP, -1 );
 
-    for (int i = 0; i < 4; i++) {
-        int sNo = i + 1;
-        if (status.sensorFaults[i].bant_I_II_Karti) activeFaults[activeFaultCount++] = { T_FLT_SENS_B12, sNo };
-        if (status.sensorFaults[i].bant_III_Sensor0) activeFaults[activeFaultCount++] = { T_FLT_SENS_B3_0, sNo };
-        if (status.sensorFaults[i].bant_III_Karti_Sensor1) activeFaults[activeFaultCount++] = { T_FLT_SENS_B3_1, sNo };
-        if (status.sensorFaults[i].bant_III_Karti_Sensor2) activeFaults[activeFaultCount++] = { T_FLT_SENS_B3_2, sNo };
-        if (status.sensorFaults[i].sensor_Birimi_Kontrol_Karti) activeFaults[activeFaultCount++] = { T_FLT_SENS_CTRL, sNo };
-        if (status.sensorFaults[i].kontrollu_Kapanma) activeFaults[activeFaultCount++] = { T_FLT_SENS_SHUTDOWN, sNo };
-        if (status.sensorFaults[i].guc_Karti_Seri_Kanal) activeFaults[activeFaultCount++] = { T_FLT_SENS_PWR_SER, sNo };
-        if (status.sensorFaults[i].basinc_Durumu) activeFaults[activeFaultCount++] = { T_FLT_SENS_PRESS, sNo };
-        if (status.sensorFaults[i].volt_3_7V) activeFaults[activeFaultCount++] = { T_FLT_SENS_V3_7, sNo };
-        if (status.sensorFaults[i].volt_7_4V) activeFaults[activeFaultCount++] = { T_FLT_SENS_V7_4, sNo };
-        if (status.sensorFaults[i].volt_16V) activeFaults[activeFaultCount++] = { T_FLT_SENS_V16, sNo };
-        if (status.sensorFaults[i].volt_80V) activeFaults[activeFaultCount++] = { T_FLT_SENS_V80, sNo };
-        if (status.sensorFaults[i].volt_neg7_4V) activeFaults[activeFaultCount++] = { T_FLT_SENS_VN7_4, sNo };
-        if (status.sensorFaults[i].volt_neg3_7V) activeFaults[activeFaultCount++] = { T_FLT_SENS_VN3_7, sNo };
-        if (status.sensorFaults[i].ana_Besleme) activeFaults[activeFaultCount++] = { T_FLT_SENS_PWR, sNo };
-        if (status.sensorFaults[i].sicaklik_Durumu) activeFaults[activeFaultCount++] = { T_FLT_SENS_TEMP_LIM, sNo };
-        if (status.sensorFaults[i].sicaklik_Sensoru) activeFaults[activeFaultCount++] = { T_FLT_SENS_TEMP_SNS, sNo };
-    }
+		 for (int i = 0; i < 4; i++) {
+			int sNo = i + 1;
+			if (status.sensorFaults[i].bant_I_II_Karti) addFault( T_FLT_SENS_B12, sNo );
+			if (status.sensorFaults[i].bant_III_Sensor0) addFault( T_FLT_SENS_B3_0, sNo );
+			if (status.sensorFaults[i].bant_III_Karti_Sensor1) addFault( T_FLT_SENS_B3_1, sNo );
+			if (status.sensorFaults[i].bant_III_Karti_Sensor2) addFault( T_FLT_SENS_B3_2, sNo );
+			if (status.sensorFaults[i].sensor_Birimi_Kontrol_Karti) addFault( T_FLT_SENS_CTRL, sNo );
+			if (status.sensorFaults[i].kontrollu_Kapanma) addFault( T_FLT_SENS_SHUTDOWN, sNo );
+			if (status.sensorFaults[i].guc_Karti_Seri_Kanal) addFault( T_FLT_SENS_PWR_SER, sNo );
+			if (status.sensorFaults[i].basinc_Durumu) addFault( T_FLT_SENS_PRESS, sNo );
+			if (status.sensorFaults[i].volt_3_7V) addFault( T_FLT_SENS_V3_7, sNo );
+			if (status.sensorFaults[i].volt_7_4V) addFault( T_FLT_SENS_V7_4, sNo );
+			if (status.sensorFaults[i].volt_16V) addFault( T_FLT_SENS_V16, sNo );
+			if (status.sensorFaults[i].volt_80V) addFault( T_FLT_SENS_V80, sNo );
+			if (status.sensorFaults[i].volt_neg7_4V) addFault( T_FLT_SENS_VN7_4, sNo );
+			if (status.sensorFaults[i].volt_neg3_7V) addFault( T_FLT_SENS_VN3_7, sNo );
+			if (status.sensorFaults[i].ana_Besleme) addFault( T_FLT_SENS_PWR, sNo );
+			if (status.sensorFaults[i].sicaklik_Durumu) addFault( T_FLT_SENS_TEMP_LIM, sNo );
+			if (status.sensorFaults[i].sicaklik_Sensoru) addFault( T_FLT_SENS_TEMP_SNS, sNo );
+		}
+	}
+
+
 
     // Tüp (Mühimmat) Arızaları (Bunlar zaten sadece Aktif olarak yaşar)
     for (int i = 0; i < 16; i++) {
         if (presenter->getFaultStatus(i)) {
             touchgfx::TypedTextId id = presenter->getFaultIsFrag(i) ? T_FAULTFRAG : T_FAULTSMOKE;
-            activeFaults[activeFaultCount++] = { id, i + 1 };
+            addFault( id, i + 1 );
         }
     }
 }

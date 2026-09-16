@@ -82,6 +82,9 @@ void Screen1Presenter::saveVolume(int volume)
 {
     model->saveVolume(volume);
 }
+bool Screen1Presenter::getTlusCommLostFlag() { return model->getTlusCommLostFlag(); }
+bool Screen1Presenter::getTlusSwDeadFlag()   { return model->getTlusSwDeadFlag(); }
+bool Screen1Presenter::getTlusFrozenFlag()   { return model->getTlusFrozenFlag(); }
 
 void Screen1Presenter::onBlackoutStateChanged(bool isBlackout)
 {
