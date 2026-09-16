@@ -223,17 +223,18 @@ namespace TLUS {
         uint8_t rxBuffer[512];
         uint16_t rxIndex = 0;
 
-        void parsePacket(uint8_t* payload, uint16_t length, uint8_t msgId);
-        uint8_t calculateChecksum(uint8_t* data, uint16_t len);
+        void parsePacket(const uint8_t* msg, uint16_t len);
+	    uint16_t expectedLenFor(uint8_t msgId, const uint8_t* msg, uint16_t len);
+	    uint8_t  buildChecksum(const uint8_t* data, uint16_t lenWithoutCks);
 
     public:
         // Arayüz ve Donanım Bağlantı Fonksiyonları
         void setListener(ICDListener* l) { listener = l; }
         void setTxFunction(void (*tx)(uint8_t*, uint16_t)) { txFunction = tx; }
 
-        // Donanımdan (RS422/UDP) byte veya dizi geldikçe buraya dök
-        void feedByte(uint8_t b);
-        void feedBuffer(uint8_t* buf, uint16_t len);
+        /* UDP her datagrami butun bir mesaj olarak tasir.
+		* Bayt akisi mantigi (feedByte) UDP icin yanlis modeldi. */
+	    void feedDatagram(const uint8_t* data, uint16_t len);
 
         // TX (Giden) Mesaj Fonksiyonları
         void sendModDegistirme(TlusMode mode);
@@ -242,6 +243,16 @@ namespace TLUS {
         void sendGvdSecimi(GvdNumber gvdNo);
         void sendGvdBilgiIstek();
         void sendTupDurumu(const uint8_t* tubeStates);
+
+        /* Teshis sayaclari - gercek TLUS'a baglanirken vazgecilmez */
+		struct Stats {
+			uint32_t accepted;
+			uint32_t badSize;
+			uint32_t badSource;
+			uint32_t lenMismatch;
+			uint32_t lenBadForType;
+			uint32_t badChecksum;
+		} stats = {};
     };
 
 } // namespace TLUS

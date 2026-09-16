@@ -1377,7 +1377,7 @@ extern "C" {
     {
         // Eğer Model oluşturulmuşsa, veriyi doğrudan ICD motoruna bas!
         if (globalModelInstance != nullptr) {
-            globalModelInstance->getProtocolManager().feedBuffer(buffer, length);
+            globalModelInstance->getProtocolManager().feedDatagram(buffer, length);
         }
     }
 }

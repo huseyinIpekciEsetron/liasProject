@@ -397,15 +397,21 @@ int main(void)
           task_time_eth_rx = current_time;
 
           // Hedef 1 - UDP Dinleme
-          int16_t udp_len = UDP_Receive_Data(TARGET_1_SOCKET, udp_rx_buffer, 100);
-          if(udp_len > 0) {
-              if (udp_len > 99) udp_len = 99;
-              udp_rx_buffer[udp_len] = '\0';
-             // TLUS_Donanimdan_Gelen_Veri(udp_rx_buffer, udp_len);
-          }
+          if (eth_status == ETH_OK)
+          {
+				/* Tehdit mesaji 40 ms'de bir geliyor; her turda kuyrugu bosalt. */
+				uint8_t guard = 0U;
+				while (guard++ < 8U)
+				{
+					int32_t n = UDP_Receive_Data(TARGET_1_SOCKET,
+												 udp_rx_buffer, sizeof(udp_rx_buffer));
+					if (n <= 0) break;
+					TLUS_Donanimdan_Gelen_Veri(udp_rx_buffer, (uint16_t)n);
+				}
+			}
 
           // Hedef 2 - TCP Dinleme
-          TCP_Server_Process(TARGET_2_SOCKET, TARGET_2_PORT, tcp_rx_buffer);
+          //TCP_Server_Process(TARGET_2_SOCKET, TARGET_2_PORT, tcp_rx_buffer);
       }
 
       // =========================================================
@@ -1430,12 +1436,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
 }
 
-// C Tarafı İçin Basit Checksum Hesaplayıcı
-uint8_t Calculate_Checksum_C(uint8_t* data, uint16_t len) {
-    uint16_t sum = 0;
-    for(uint16_t i = 0; i < len; i++) sum += data[i];
-    return (uint8_t)(sum & 0xFF);
-}
 
 // Decimal'den BCD'ye Çevirici Makro (Saat ve Dakika için)
 #define DEC2BCD(val) ((((val) / 10) << 4) | ((val) % 10))
@@ -1459,8 +1459,9 @@ void Debug_Data_Injector(void)
 
         buf[0] = 0x02; // SRC_TLUS
         buf[1] = 0x01; // MSG_TLUS_TEHDITLERI
-        buf[2] = (packet_len & 0xFF);         // LSB
-        buf[3] = ((packet_len >> 8) & 0xFF);  // MSB
+        /* Uzunluk: BIG-ENDIAN */
+		buf[2] = (uint8_t)(packet_len >> 8);
+		buf[3] = (uint8_t)(packet_len & 0xFFU);
 
         buf[4] = 0x80; // Geçerli
         buf[5] = count;
@@ -1494,8 +1495,10 @@ void Debug_Data_Injector(void)
             offset += 14;
         }
 
-        // Checksum
-        buf[packet_len - 1] = Calculate_Checksum_C(buf, packet_len - 1);
+        /* Saglama: 2's complement, son bayt haric toplam */
+		uint8_t sum = 0U;
+		for (uint16_t i = 0U; i < (packet_len - 1U); i++) sum += buf[i];
+		buf[packet_len - 1U] = (uint8_t)((uint8_t)(~sum) + 1U);
 
         // TouchGFX Model'e yolla
         TLUS_Donanimdan_Gelen_Veri(buf, packet_len);
@@ -1508,8 +1511,10 @@ void Debug_Data_Injector(void)
 		uint8_t buf[15];
 		buf[0] = 0x02; // SRC_TLUS
 		buf[1] = 0x0C; // MSG_TARIH_ZAMAN
-		buf[2] = 15;   // Uzunluk (LSB)
-		buf[3] = 0x00; // Uzunluk (MSB)
+
+		 /* Uzunluk: BIG-ENDIAN */
+		buf[2] = (uint8_t)(0x0F >> 8);
+		buf[3] = (uint8_t)(0x0F & 0xFFU);
 
 		// Byte 5-6: Geçerlilik (Bit 1-0 = 1, RTC Geçerli)
 		buf[4] = 0x00;
@@ -1537,8 +1542,10 @@ void Debug_Data_Injector(void)
 		buf[12] = (dbg_time_year >> 8) & 0xFF; // MSB
 		buf[13] = (dbg_time_year & 0xFF);      // LSB
 
-		// Byte 15: Checksum
-		buf[14] = Calculate_Checksum_C(buf, 14);
+		/* Saglama: 2's complement, son bayt haric toplam */
+		    uint8_t sum = 0U;
+		    for (uint16_t i = 0U; i < (15 - 1U); i++) sum += buf[i];
+		    buf[15 - 1U] = (uint8_t)((uint8_t)(~sum) + 1U);
 
 		TLUS_Donanimdan_Gelen_Veri(buf, 15);
 	}

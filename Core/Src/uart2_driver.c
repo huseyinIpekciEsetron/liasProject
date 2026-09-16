@@ -9,8 +9,6 @@
 #include "uart2_driver.h"
 #include <string.h>
 
-extern volatile uint32_t dbg_rawTotal;
-
 extern CRC_HandleTypeDef hcrc;          /* main.c'de tanimli, su ana kadar kullanilmiyordu */
 
 #define BMB_FRAME_LEN   64U

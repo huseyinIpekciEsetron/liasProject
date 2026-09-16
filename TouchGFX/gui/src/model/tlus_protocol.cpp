@@ -10,52 +10,71 @@
 
 namespace TLUS {
 
-uint8_t Protocol::calculateChecksum(uint8_t* data, uint16_t len) {
-    uint16_t sum = 0;
-    for(uint16_t i = 0; i < len; i++) sum += data[i];
-    return (uint8_t)(sum & 0xFF); // Basit 8-bit checksum varsayımı (ICD'ye göre düzenlenebilir)
+static uint8_t Protocol::calculateChecksum(uint8_t* data, uint16_t len) {
+	uint8_t sum = 0U;
+	for (uint16_t i = 0U; i < len; i++) sum += data[i];
+	if (sum != 0U) { stats.badChecksum++; return; }
 }
 
-void Protocol::feedBuffer(uint8_t* buf, uint16_t len) {
-    for(uint16_t i = 0; i < len; i++) {
-        feedByte(buf[i]);
-    }
+uint8_t Protocol::buildChecksum(const uint8_t* data, uint16_t lenWithoutCks)
+{
+    uint8_t sum = 0U;
+    for (uint16_t i = 0U; i < lenWithoutCks; i++) sum += data[i];
+    return (uint8_t)((uint8_t)(~sum) + 1U);      /* ICD: 2's complement */
 }
 
-void Protocol::feedByte(uint8_t b) {
-    if(rxIndex >= sizeof(rxBuffer)) rxIndex = 0; // Taşma koruması
-    rxBuffer[rxIndex++] = b;
+void Protocol::feedDatagram(const uint8_t* data, uint16_t len)
+{
+    /* 1. Asgari cerceve: kaynak(1) + tip(1) + uzunluk(2) + saglama(1) */
+    if (data == nullptr || len < 5U || len > 512U) { stats.badSize++; return; }
 
-    // Minimum header uzunluğu (Örn: Src + MsgId + Length(2) = 4 Byte)
-    if (rxIndex >= 4) {
-        uint16_t expectedLen = (rxBuffer[3] << 8) | rxBuffer[2]; // Little Endian Uzunluk
+    /* 2. Kaynak: yalnizca TLUS kabul edilir.
+     *    Ayni porta yayin yapan baska cihazlari eler. */
+    if (data[0] != SRC_TLUS) { stats.badSource++; return; }
 
-        if (expectedLen < 5 || expectedLen > 500) {
-            // Hatalı paket, kaydırıp baştan dene
-            rxBuffer[0] = rxBuffer[rxIndex-1];
-            rxIndex = 1;
-            return;
+    /* 3. Beyan edilen uzunluk - BIG-ENDIAN (ICD'deki tum 16-bit alanlar boyle) */
+    uint16_t declaredLen = ((uint16_t)data[2] << 8) | (uint16_t)data[3];
+    if (declaredLen != len) { stats.lenMismatch++; return; }
+
+    /* 4. Mesaj tipinin gerektirdigi uzunluk.
+     *    Bu gectikten sonra parsePacket her alanin var oldugunu BILIR;
+     *    sabit offsetlerden sinir kontrolsuz okumak artik guvenli. */
+    if (expectedLenFor(data[1], data, len) != len) { stats.lenBadForType++; return; }
+
+    /* 5. Saglama: ICD'ye gore cks = -(bayt1..baytN-1 toplami),
+     *    dolayisiyla SON BAYT DAHIL toplam sifir olmali. */
+    uint8_t sum = 0U;
+    for (uint16_t i = 0U; i < len; i++) sum += data[i];
+    if (sum != 0U) { stats.badChecksum++; return; }
+
+    stats.accepted++;
+    parsePacket(data, len);
+}
+
+uint16_t Protocol::expectedLenFor(uint8_t msgId, const uint8_t* d, uint16_t len)
+{
+    switch (msgId)
+    {
+        case MSG_TLUS_TEHDITLERI:
+        {
+            /* ICD: 7 bayt (tehdit yok) ... 287 bayt (20 tehdit) = 7 + count*14 */
+            if (len < 7U) return 0U;
+            uint8_t cnt = d[5] & 0x3FU;          /* bayt 6, bit 5-0 */
+            if (cnt > 20U) return 0U;
+            return (uint16_t)(7U + (uint16_t)cnt * 14U);
         }
-
-        // Tüm paket geldiyse
-        if (rxIndex == expectedLen) {
-            uint8_t msgChecksum = rxBuffer[rxIndex - 1];
-            uint8_t calcChecksum = calculateChecksum(rxBuffer, rxIndex - 1);
-
-            if (msgChecksum == calcChecksum) {
-                // Paket DOĞRU! İçeriğini ayrıştır.
-                parsePacket(rxBuffer, expectedLen, rxBuffer[1]);
-            }
-            rxIndex = 0; // Yeni mesaj için sıfırla
-        }
+        case MSG_SISTEM_DURUMU:  return 60U;
+        case MSG_TARIH_ZAMAN:    return 15U;
+        case MSG_GVD_BILGILERI:  return 287U;
+        default:                 return 0U;      /* bilinmeyen tip -> reddet */
     }
 }
 
 // ICD'den Gelen Mesajları Okuma
-void Protocol::parsePacket(uint8_t* payload, uint16_t length, uint8_t msgId) {
+void Protocol::parsePacket(const uint8_t* msg, uint16_t len){
     if (!listener) return;
 
-    switch(msgId) {
+    switch(msg[1]) {
         case MSG_TARIH_ZAMAN: {
         	TimeData t;
 			t.isValid = false;
@@ -296,7 +315,7 @@ void Protocol::sendModDegistirme(TlusMode mode) {
     txBuf[4] = (modeData & 0xFF);         // Byte 5 (LSB)
     txBuf[5] = ((modeData >> 8) & 0xFF);  // Byte 6 (MSB)
 
-    txBuf[6] = calculateChecksum(txBuf, 6); // Byte 7 (Sağlama Toplamı)
+    txBuf[6] = buildChecksum(txBuf, 6); // Byte 7 (Sağlama Toplamı)
 
     txFunction(txBuf, 7); // Byte'ları Donanıma Fırlat!
 }
@@ -304,7 +323,7 @@ void Protocol::sendModDegistirme(TlusMode mode) {
 void Protocol::sendSoftReset() {
     if (!txFunction) return;
     uint8_t txBuf[7] = {SRC_VYS_CB, MSG_SOFT_RESET, 0x07, 0x00, 0x00, 0x00, 0};
-    txBuf[6] = calculateChecksum(txBuf, 6);
+    txBuf[6] = buildChecksum(txBuf, 6);
     txFunction(txBuf, 7);
 }
 
@@ -325,7 +344,7 @@ void Protocol::sendAcilSilme(EraseTarget target) {
     txBuf[5] = ((commandWord >> 8) & 0xFF);  // Byte 6 (MSB)
 
     // Sağlama Toplamı
-    txBuf[6] = calculateChecksum(txBuf, 6);
+    txBuf[6] = buildChecksum(txBuf, 6);
 
     // Donanıma Gönder
     txFunction(txBuf, 7);
@@ -352,7 +371,7 @@ void Protocol::sendGvdSecimi(GvdNumber gvdNo) {
     txBuf[7] = ((gvdValue >> 8) & 0xFF);  // MSB
 
     // Byte 9: Sağlama Toplamı (Checksum)
-    txBuf[8] = calculateChecksum(txBuf, 8);
+    txBuf[8] = buildChecksum(txBuf, 8);
 
     // 9 Byte'ı Donanıma Fırlat!
     txFunction(txBuf, 9);
@@ -368,7 +387,7 @@ void Protocol::sendGvdBilgiIstek() {
     txBuf[3] = 0x00;                // Uzunluk MSB
 
     // Byte 5: Sağlama Toplamı (Checksum)
-    txBuf[4] = calculateChecksum(txBuf, 4);
+    txBuf[4] = buildChecksum(txBuf, 4);
 
     // 5 Byte'ı Donanıma Fırlat!
     txFunction(txBuf, 5);
@@ -393,7 +412,7 @@ void Protocol::sendTupDurumu(const uint8_t* tubeStates) {
     }
 
     // Byte 9: Sağlama Toplamı
-    txBuf[8] = calculateChecksum(txBuf, 8);
+    txBuf[8] = buildChecksum(txBuf, 8);
 
     // Donanıma Gönder
     txFunction(txBuf, 9);
