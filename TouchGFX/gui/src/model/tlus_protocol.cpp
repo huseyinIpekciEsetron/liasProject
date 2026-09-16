@@ -10,12 +10,6 @@
 
 namespace TLUS {
 
-static uint8_t Protocol::calculateChecksum(uint8_t* data, uint16_t len) {
-	uint8_t sum = 0U;
-	for (uint16_t i = 0U; i < len; i++) sum += data[i];
-	if (sum != 0U) { stats.badChecksum++; return; }
-}
-
 uint8_t Protocol::buildChecksum(const uint8_t* data, uint16_t lenWithoutCks)
 {
     uint8_t sum = 0U;
@@ -74,15 +68,26 @@ uint16_t Protocol::expectedLenFor(uint8_t msgId, const uint8_t* d, uint16_t len)
 void Protocol::parsePacket(const uint8_t* msg, uint16_t len){
     if (!listener) return;
 
+    /* NOT: Uzunluk dogrulamasi feedDatagram icinde tamamlandi.
+     * Buraya gelen her mesajin tum alanlari mevcuttur, bu yuzden
+     * asagidaki sabit offsetler guvenlidir. */
+    (void)len;
+
     switch(msg[1]) {
         case MSG_TARIH_ZAMAN: {
         	TimeData t;
 			t.isValid = false;
 
 			// 1. Geçerlilik Kontrolü (Byte 5-6, Bit 1-0)
-			uint16_t word5_6 = (payload[4] << 8) | payload[5];
+			uint16_t word5_6 = (msg[4] << 8) | msg[5];
 			uint8_t validity = word5_6 & 0x03; // Son iki bit
-			if (validity == 0) break; // Geçersiz ise (0), veriyi işleme
+			if (validity == 0) {
+				/* TLUS saatinin gecersiz oldugunu bildiriyor. Sessizce yok
+				 * saymak yerine arayuze haber ver; aksi halde ekranda son
+				 * gecerli saat donup kalir ve operator onu canli sanir. */
+				listener->onTimeDataParsed(t);   // t.isValid == false
+				break;
+			}
 			t.isValid = true;
 
 			// Yardımcı Lambda Fonksiyonu: BCD Byte'ını Decimal'e Çevir
@@ -91,22 +96,22 @@ void Protocol::parsePacket(const uint8_t* msg, uint16_t len){
 			};
 
 			// 2. Saat ve Dakika (Byte 7-8)
-			t.hour   = bcd2dec(payload[6]);
-			t.minute = bcd2dec(payload[7]);
+			t.hour   = bcd2dec(msg[6]);
+			t.minute = bcd2dec(msg[7]);
 
 			// 3. Saniye ve Yılın Günü (MSB Kısmı) (Byte 9-10)
-			t.second = bcd2dec(payload[8]);
+			t.second = bcd2dec(msg[8]);
 
 			// Yılın günü 12 bitlik bir sayıdır. (Byte 9'un alt 4 biti ve Byte 10)
 			// Lütfen ICD tablosuna dikkat et: Yılın günü 10, 11 ve 12. bytelara dağılmış.
 			// Yüzler ve Onlar basamağı Byte 10'da (BCD)
 			// Birler basamağı Byte 11'in üst 4 bitinde (BCD)
-			uint8_t dayOfYear_100_10 = bcd2dec(payload[9]); // Yüzler ve Onlar
-			uint8_t dayOfYear_1      = (payload[10] >> 4) & 0x0F; // Birler
+			uint8_t dayOfYear_100_10 = bcd2dec(msg[9]); // Yüzler ve Onlar
+			uint8_t dayOfYear_1      = (msg[10] >> 4) & 0x0F; // Birler
 			uint16_t dayOfYear = (dayOfYear_100_10 * 10) + dayOfYear_1;
 
 			// 4. Yıl Bilgisi (Byte 13-14) LSB 1 formatında Unsigned Short
-			t.year = (payload[12] << 8) | payload[13];
+			t.year = (msg[12] << 8) | msg[13];
 
 			// 5. Yılın Gününü -> Ay ve Güne Çevirme Algoritması
 			bool isLeapYear = ((t.year % 4 == 0 && t.year % 100 != 0) || (t.year % 400 == 0));
@@ -128,7 +133,7 @@ void Protocol::parsePacket(const uint8_t* msg, uint16_t len){
             ThreatMessagePayload tMsg;
 
             // 1. Byte 5 ve 6: Geçerlilik ve Tehdit Sayısı
-            uint16_t word5_6 = (payload[4] << 8) | payload[5];
+            uint16_t word5_6 = (msg[4] << 8) | msg[5];
 
             tMsg.isValid = (word5_6 >> 15) & 0x01; // Bit 15: Geçerlilik
             tMsg.count   = word5_6 & 0x3F;         // Bit 5-0: Tehdit Sayısı
@@ -141,7 +146,7 @@ void Protocol::parsePacket(const uint8_t* msg, uint16_t len){
             for(int i = 0; i < tMsg.count; i++) {
 
 				// Bayt 7-8: Sınıf, AgeOut, Öncelik
-				uint16_t word7_8 = (payload[offset] << 8) | payload[offset+1];
+				uint16_t word7_8 = (msg[offset] << 8) | msg[offset+1];
 
 				// YENİ HALİ: Enum'a cast ediyoruz
 				tMsg.threats[i].threatClass = static_cast<ThreatClass>((word7_8 >> 12) & 0x0F);
@@ -149,10 +154,10 @@ void Protocol::parsePacket(const uint8_t* msg, uint16_t len){
 				tMsg.threats[i].priority    = (word7_8 >> 6)  & 0x1F;
 
 				// Bayt 9-10: Tehdit Numarası
-				tMsg.threats[i].threatNumber = (payload[offset+2] << 8) | payload[offset+3];
+				tMsg.threats[i].threatNumber = (msg[offset+2] << 8) | msg[offset+3];
 
 				// Bayt 11-12: Band ve Açı
-				uint16_t word11_12 = (payload[offset+4] << 8) | payload[offset+5];
+				uint16_t word11_12 = (msg[offset+4] << 8) | msg[offset+5];
 
 				// YENİ HALİ: Enum'a cast ediyoruz
 				tMsg.threats[i].band  = static_cast<ThreatBand>((word11_12 >> 12) & 0x0F);
@@ -161,12 +166,12 @@ void Protocol::parsePacket(const uint8_t* msg, uint16_t len){
 				tMsg.threats[i].angle = (float)rawAngle * 0.1f;
 
                 // Bayt 13-16: Tehdit Tanımlama Kodu
-                tMsg.threats[i].trackCode = (payload[offset+6] << 24) | (payload[offset+7] << 16) |
-                                            (payload[offset+8] << 8)  | payload[offset+9];
+                tMsg.threats[i].trackCode = (msg[offset+6] << 24) | (msg[offset+7] << 16) |
+                                            (msg[offset+8] << 8)  | msg[offset+9];
 
                 // Bayt 17-20: Darbe Tekrar Periyodu
-                tMsg.threats[i].prf       = (payload[offset+10] << 24) | (payload[offset+11] << 16) |
-                                            (payload[offset+12] << 8)  | payload[offset+13];
+                tMsg.threats[i].prf       = (msg[offset+10] << 24) | (msg[offset+11] << 16) |
+                                            (msg[offset+12] << 8)  | msg[offset+13];
 
                 offset += 14; // Bir sonraki tehdit 14 byte ileride
             }
@@ -179,7 +184,7 @@ void Protocol::parsePacket(const uint8_t* msg, uint16_t len){
             SystemStatusPayload s;
 
             // 1. Genel Durum (Byte 5-6)
-            uint16_t w5_6 = (payload[4] << 8) | payload[5];
+            uint16_t w5_6 = (msg[4] << 8) | msg[5];
             s.isValid          = (w5_6 >> 15) & 0x01;
             s.isPbitDone       = (w5_6 >> 14) & 0x01;
             s.sensor1GenelHata = (w5_6 >> 13) & 0x01;
@@ -190,20 +195,20 @@ void Protocol::parsePacket(const uint8_t* msg, uint16_t len){
             s.tlusState        = w5_6 & 0x03;
 
             // 2. İşlemci Birimi Hataları (Byte 7-12)
-            uint16_t w7_8 = (payload[6] << 8) | payload[7];
+            uint16_t w7_8 = (msg[6] << 8) | msg[7];
             s.processorFaults.ramTesti           = (w7_8 >> 15) & 0x01;
             s.processorFaults.kaliciBellekTesti  = (w7_8 >> 11) & 0x01;
             s.processorFaults.bellekDosyasiTesti = (w7_8 >> 7)  & 0x01;
             s.processorFaults.nvsramTesti        = (w7_8 >> 3)  & 0x01;
             s.processorFaults.bellekDoluluk      = (w7_8 >> 2)  & 0x01;
 
-            uint16_t w9_10 = (payload[8] << 8) | payload[9];
+            uint16_t w9_10 = (msg[8] << 8) | msg[9];
             s.processorFaults.seriKanal1 = (w9_10 >> 15) & 0x01;
             s.processorFaults.seriKanal2 = (w9_10 >> 11) & 0x01;
             s.processorFaults.seriKanal3 = (w9_10 >> 7)  & 0x01;
             s.processorFaults.seriKanal4 = (w9_10 >> 3)  & 0x01;
 
-            uint16_t w11_12 = (payload[10] << 8) | payload[11];
+            uint16_t w11_12 = (msg[10] << 8) | msg[11];
             s.processorFaults.arayuzKarti          = (w11_12 >> 15) & 0x01;
             s.processorFaults.anaBesleme           = (w11_12 >> 11) & 0x01;
             s.processorFaults.islemciDurumuKapanma = (w11_12 >> 7)  & 0x01;
@@ -213,8 +218,8 @@ void Protocol::parsePacket(const uint8_t* msg, uint16_t len){
             // 3. Sensör Hataları (Byte 15-30 arası, her sensör için 4 byte)
             for (int i = 0; i < 4; i++) {
                 int offset = 14 + (i * 4); // Sensör 1 Byte 15'ten (index 14) başlar
-                uint16_t msb = (payload[offset] << 8) | payload[offset+1];
-                uint16_t lsb = (payload[offset+2] << 8) | payload[offset+3];
+                uint16_t msb = (msg[offset] << 8) | msg[offset+1];
+                uint16_t lsb = (msg[offset+2] << 8) | msg[offset+3];
 
                 s.sensorFaults[i].bant_I_II_Karti        = (msb >> 15) & 0x01;
                 s.sensorFaults[i].bant_III_Sensor0     = (msb >> 11) & 0x01;
@@ -237,28 +242,28 @@ void Protocol::parsePacket(const uint8_t* msg, uint16_t len){
             }
 
             // 4. TLUS Modu, Heartbeat, GVD vb. Diğer Bilgiler
-            uint16_t w47_48 = (payload[46] << 8) | payload[47];
+            uint16_t w47_48 = (msg[46] << 8) | msg[47];
 			s.tlusMode = static_cast<TlusMode>(w47_48 & 0x0FFF);
 
-			s.heartbeat = (payload[48] << 8) | payload[49];
+			s.heartbeat = (msg[48] << 8) | msg[49];
 
 			// Konfigürasyon Durumu (0xAA veya 0x01)
-			s.configStatus = static_cast<ConfigAcceptance>(payload[51]);
+			s.configStatus = static_cast<ConfigAcceptance>(msg[51]);
 
 			// Acil Silme Durumları
-			uint16_t w53_54 = (payload[52] << 8) | payload[53];
+			uint16_t w53_54 = (msg[52] << 8) | msg[53];
 			s.acilSilmeYazilim = static_cast<EraseStatus>((w53_54 >> 4) & 0x03);
 			s.acilSilmeGVD     = static_cast<EraseStatus>((w53_54 >> 2) & 0x03);
 			s.acilSilmeKayit   = static_cast<EraseStatus>((w53_54 >> 0) & 0x03);
 
 			// GVD ve Disk Durumları
-			uint16_t w55_56 = (payload[54] << 8) | payload[55];
+			uint16_t w55_56 = (msg[54] << 8) | msg[55];
 			s.activeGvd              = (w55_56 >> 2) & 0x0F;
 			s.isDiskOverwriteEnabled = (w55_56 >> 1) & 0x01;
 			s.isBlankingActive       = (w55_56 >> 0) & 0x01;
 
 			// Dosya Sistemi Durumu
-			s.fileSysFormatting = static_cast<FileSystemStatus>(payload[56] & 0x01); // Byte 57, Bit 0
+			s.fileSysFormatting = static_cast<FileSystemStatus>(msg[56] & 0x01); // Byte 57, Bit 0
 
 			// Hazırlanan bu devasa ve tertemiz paketi Model'e fırlat!
 			listener->onSystemStatusParsed(s);
@@ -268,7 +273,7 @@ void Protocol::parsePacket(const uint8_t* msg, uint16_t len){
 			GvdMessagePayload gvdMsg;
 
 			// 1. GVD Geçerlilik Bilgisi (Byte 5-6)
-			uint16_t w5_6 = (payload[4] << 8) | payload[5];
+			uint16_t w5_6 = (msg[4] << 8) | msg[5];
 
 			// 2. 5 Adet GVD için döngü
 			for (int i = 0; i < 5; i++) {
@@ -281,13 +286,13 @@ void Protocol::parsePacket(const uint8_t* msg, uint16_t len){
 
 				// İsim Bilgisini Kopyala (32 Byte)
 				for (int j = 0; j < 32; j++) {
-					gvdMsg.gvds[i].name[j] = static_cast<char>(payload[offset + j]);
+					gvdMsg.gvds[i].name[j] = static_cast<char>(msg[offset + j]);
 				}
 				gvdMsg.gvds[i].name[32] = '\0'; // String bitiş karakteri (UI için şart)
 
 				// Versiyon Bilgisini Kopyala (24 Byte)
 				for (int j = 0; j < 24; j++) {
-					gvdMsg.gvds[i].version[j] = static_cast<char>(payload[offset + 32 + j]);
+					gvdMsg.gvds[i].version[j] = static_cast<char>(msg[offset + 32 + j]);
 				}
 				gvdMsg.gvds[i].version[24] = '\0'; // String bitiş karakteri
 			}
@@ -306,14 +311,14 @@ void Protocol::sendModDegistirme(TlusMode mode) {
     uint8_t txBuf[7];
     txBuf[0] = SRC_VYS_CB;         // Kaynak (0x01)
     txBuf[1] = MSG_MOD_DEGISTIRME; // Mesaj Tipi (0x06)
-    txBuf[2] = 0x07;               // Uzunluk LSB (Byte 3)
-    txBuf[3] = 0x00;               // Uzunluk MSB (Byte 4)
+    txBuf[2] = 0x00;               // Uzunluk MSB (Byte 3) - BIG-ENDIAN
+    txBuf[3] = 0x07;               // Uzunluk LSB (Byte 4)
 
     // Enum değerini al, Bit 15-12 arasını rezerve (0) bırakarak 12-bit maskele
     uint16_t modeData = static_cast<uint16_t>(mode) & 0x0FFF;
 
-    txBuf[4] = (modeData & 0xFF);         // Byte 5 (LSB)
-    txBuf[5] = ((modeData >> 8) & 0xFF);  // Byte 6 (MSB)
+    txBuf[4] = ((modeData >> 8) & 0xFF);  // Byte 5 (MSB) - BIG-ENDIAN
+    txBuf[5] = (modeData & 0xFF);         // Byte 6 (LSB)
 
     txBuf[6] = buildChecksum(txBuf, 6); // Byte 7 (Sağlama Toplamı)
 
@@ -322,7 +327,7 @@ void Protocol::sendModDegistirme(TlusMode mode) {
 
 void Protocol::sendSoftReset() {
     if (!txFunction) return;
-    uint8_t txBuf[7] = {SRC_VYS_CB, MSG_SOFT_RESET, 0x07, 0x00, 0x00, 0x00, 0};
+    uint8_t txBuf[7] = {SRC_VYS_CB, MSG_SOFT_RESET, 0x00, 0x07, 0x00, 0x00, 0};
     txBuf[6] = buildChecksum(txBuf, 6);
     txFunction(txBuf, 7);
 }
@@ -333,15 +338,15 @@ void Protocol::sendAcilSilme(EraseTarget target) {
     uint8_t txBuf[7];
     txBuf[0] = SRC_VYS_CB;       // Kaynak (0x01)
     txBuf[1] = MSG_ACIL_SILME;   // Mesaj Tipi (0x0E)
-    txBuf[2] = 0x07;             // Uzunluk LSB
-    txBuf[3] = 0x00;             // Uzunluk MSB
+    txBuf[2] = 0x00;             // Uzunluk MSB - BIG-ENDIAN
+    txBuf[3] = 0x07;             // Uzunluk LSB
 
     // Acil Silme Komutları (Byte 5 ve 6)
     // target değişkeni zaten Bit 0, 1 ve 2'ye uygun şekilde ayarlandı
     uint16_t commandWord = static_cast<uint16_t>(target);
 
-    txBuf[4] = (commandWord & 0xFF);         // Byte 5 (LSB)
-    txBuf[5] = ((commandWord >> 8) & 0xFF);  // Byte 6 (MSB)
+    txBuf[4] = ((commandWord >> 8) & 0xFF);  // Byte 5 (MSB) - BIG-ENDIAN
+    txBuf[5] = (commandWord & 0xFF);         // Byte 6 (LSB)
 
     // Sağlama Toplamı
     txBuf[6] = buildChecksum(txBuf, 6);
@@ -357,18 +362,18 @@ void Protocol::sendGvdSecimi(GvdNumber gvdNo) {
     uint8_t txBuf[9];
     txBuf[0] = SRC_VYS_CB;       // Kaynak (0x01)
     txBuf[1] = MSG_GVD_SECIMI;   // Mesaj Tipi (0x0D)
-    txBuf[2] = 0x09;             // Uzunluk LSB (9 Byte)
-    txBuf[3] = 0x00;             // Uzunluk MSB
+    txBuf[2] = 0x00;             // Uzunluk MSB - BIG-ENDIAN
+    txBuf[3] = 0x09;             // Uzunluk LSB (9 Byte)
 
     // Byte 5-6: Geçerlilik (Sadece Bit 0 = 1 olacak)
     uint16_t validity = 0x0001;
-    txBuf[4] = (validity & 0xFF);         // LSB
-    txBuf[5] = ((validity >> 8) & 0xFF);  // MSB
+    txBuf[4] = ((validity >> 8) & 0xFF);  // Byte 5 (MSB) - BIG-ENDIAN
+    txBuf[5] = (validity & 0xFF);         // Byte 6 (LSB)
 
     // Enum'ı uint16_t'ye çevir ve Byte 7-8'e yerleştir
     uint16_t gvdValue = static_cast<uint16_t>(gvdNo);
-    txBuf[6] = (gvdValue & 0xFF);         // LSB
-    txBuf[7] = ((gvdValue >> 8) & 0xFF);  // MSB
+    txBuf[6] = ((gvdValue >> 8) & 0xFF);  // Byte 7 (MSB) - BIG-ENDIAN
+    txBuf[7] = (gvdValue & 0xFF);         // Byte 8 (LSB)
 
     // Byte 9: Sağlama Toplamı (Checksum)
     txBuf[8] = buildChecksum(txBuf, 8);
@@ -383,8 +388,8 @@ void Protocol::sendGvdBilgiIstek() {
     uint8_t txBuf[5];
     txBuf[0] = SRC_VYS_CB;          // Kaynak (0x01)
     txBuf[1] = MSG_GVD_BILGI_ISTEK; // Mesaj Tipi (0x26)
-    txBuf[2] = 0x05;                // Uzunluk LSB (5 Byte)
-    txBuf[3] = 0x00;                // Uzunluk MSB
+    txBuf[2] = 0x00;                // Uzunluk MSB - BIG-ENDIAN
+    txBuf[3] = 0x05;                // Uzunluk LSB (5 Byte)
 
     // Byte 5: Sağlama Toplamı (Checksum)
     txBuf[4] = buildChecksum(txBuf, 4);
@@ -400,8 +405,8 @@ void Protocol::sendTupDurumu(const uint8_t* tubeStates) {
     uint8_t txBuf[9];
     txBuf[0] = SRC_VYS_CB;       // Kaynak (0x01)
     txBuf[1] = MSG_TUP_DURUMU;   // Mesaj Tipi (0x30)
-    txBuf[2] = 0x09;             // Uzunluk LSB (9 Byte)
-    txBuf[3] = 0x00;             // Uzunluk MSB
+    txBuf[2] = 0x00;             // Uzunluk MSB - BIG-ENDIAN
+    txBuf[3] = 0x09;             // Uzunluk LSB (9 Byte)
 
     // 16 tüpü 4'lü gruplar halinde Byte 5, 6, 7 ve 8'e paketle
     for(int i = 0; i < 4; i++) {

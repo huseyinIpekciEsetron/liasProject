@@ -219,10 +219,6 @@ namespace TLUS {
         ICDListener* listener = nullptr;
         void (*txFunction)(uint8_t*, uint16_t) = nullptr;
 
-        // Byte Buffer (Paket Toplayıcı)
-        uint8_t rxBuffer[512];
-        uint16_t rxIndex = 0;
-
         void parsePacket(const uint8_t* msg, uint16_t len);
 	    uint16_t expectedLenFor(uint8_t msgId, const uint8_t* msg, uint16_t len);
 	    uint8_t  buildChecksum(const uint8_t* data, uint16_t lenWithoutCks);

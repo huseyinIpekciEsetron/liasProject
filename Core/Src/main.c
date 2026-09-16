@@ -1555,8 +1555,10 @@ void Debug_Data_Injector(void)
 
 		buf[0] = 0x02; // SRC_TLUS
 		buf[1] = 0x08; // MSG_SISTEM_DURUMU
-		buf[2] = 60;   // Uzunluk LSB
-		buf[3] = 0x00; // Uzunluk MSB
+
+		 /* Uzunluk: BIG-ENDIAN */
+		buf[2] = (uint8_t)(0x3C >> 8);
+		buf[3] = (uint8_t)(0x3C & 0xFFU);
 
 		// Byte 5-6: Genel Durum ve Geçerlilik (Bit 15 = 1)
 		buf[4] = 0x80;
@@ -1587,8 +1589,11 @@ void Debug_Data_Injector(void)
 			buf[offset+3] = dbg_sys_sens_faults_lsb[i] & 0xFF;
 		}
 
-		// Byte 60: Checksum
-		buf[59] = Calculate_Checksum_C(buf, 59);
+
+		/* Saglama: 2's complement, son bayt haric toplam */
+		uint8_t sum = 0U;
+		for (uint16_t i = 0U; i < (60 - 1U); i++) sum += buf[i];
+		buf[60 - 1U] = (uint8_t)((uint8_t)(~sum) + 1U);
 
 		// Paketi Fırlat
 		TLUS_Donanimdan_Gelen_Veri(buf, 60);
