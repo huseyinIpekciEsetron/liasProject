@@ -30,6 +30,10 @@
         <Translation Language="GB">SİSTEM BAŞLATILDI</Translation>
         <Translation Language="ENG">SYSTEM STARTED</Translation>
       </Text>
+      <Text Id="WARNTLUSCOMM" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">TLUS VERİSİ YOK! TEHDİT GÖRÜNTÜLENEMİYOR</Translation>
+        <Translation Language="ENG">NO TLUS DATA! THREAT CANNOT BE DISPLAYED</Translation>
+      </Text>
       <Text Id="WARNTLUSFROZEN" Alignment="Left" TypographyId="RadarFont">
         <Translation Language="GB">TLUS VERİSİ GÜNCELLENMİYOR</Translation>
         <Translation Language="ENG">TLUS DATA IS NOT BEING UPDATED</Translation>

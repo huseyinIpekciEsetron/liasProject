@@ -190,6 +190,7 @@ void Model::dispatchWarning(WarningType warning, int tubeIndex)
 
         case WARN_TLUS_SW_DEAD:        msgId = T_WARNTLUSSW; break;
         case WARN_TLUS_FROZEN:		   msgId = T_WARNTLUSFROZEN; break;
+        case WARN_TLUS_COMM_LOST:      msgId = T_WARNTLUSCOMM; break;
 
         // ATIŞ/MÜHİMMAT DURUMLARI
         case WARN_BLASTING_FAILED_SMOKE: msgId = T_WARNBLASTFAIL_SMOKE; break;
@@ -330,7 +331,7 @@ void Model::processThreatAlarm()
             tehdidler.count   = 0;
             tlus_comm_lost_flag = true;
 
-            dispatchWarning(WARN_COMM_LOST);
+            dispatchWarning(WARN_TLUS_COMM_LOST);
 
             if (modelListener != 0 && currentScreen == SCREEN_RADAR) {
                 modelListener->onRadarTargetsReceived(tehdidler);  /* radari temizle */
