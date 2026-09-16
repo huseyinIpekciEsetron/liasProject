@@ -41,6 +41,7 @@ static BMB_TxPacket_t bmb_tx_packet = {0};
 
 static uint8_t bmb_timestamp = 0;
 static bool new_bmb_data_flag = false;
+static uint8_t bmb_timestamp_stuck = 0;
 
 // TX Paketi için dinamik değişkenler
 static uint8_t current_tx_power_ready = 0x00;
@@ -305,9 +306,20 @@ void UART2_ProcessRxFrame(void)
 
 		if (hesaplanan == gelen)
 		{
+			static uint8_t  last_ts      = 200;
+			static uint8_t  stuck_count  = 0U;
+
+			if (paket->timestamp == last_ts) {
+				if (stuck_count < 200U) stuck_count++;
+			} else {
+				stuck_count = 0U;
+				last_ts     = paket->timestamp;
+			}
+			bmb_timestamp_stuck = (stuck_count >= 10U);   /* ~200 ms donmus */
+
 			memcpy(&Validated_Rx_Packet, paket, sizeof(BMB_RxPacket_t));
 			new_bmb_data_flag = true;
-			last_valid_rx_ms  = HAL_GetTick();   /* gercek varis zamani */
+			last_valid_rx_ms  = HAL_GetTick();
 		}
 	}
 }

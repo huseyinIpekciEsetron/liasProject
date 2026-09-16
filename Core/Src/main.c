@@ -132,7 +132,7 @@ uint32_t task_time_buttons  = 0;
 // ========================================================
 #define MAX_DBG_THREATS 5 // Aynı anda test edilecek maksimum hedef sayısı
 
-volatile uint8_t  dbg_threat_count = 1; // Başlangıçta 2 hedef göndersin
+volatile uint8_t  dbg_threat_count = 0; // Başlangıçta 2 hedef göndersin
 
 // Aşağıdaki değişkenleri Live Expressions'a ekleyip yanındaki OK işaretinden genişletin:
 // Index 0 -> 1. Hedef, Index 1 -> 2. Hedef ...
@@ -150,6 +150,7 @@ volatile uint8_t dbg_time_second      = 0;
 volatile uint16_t dbg_time_dayOfYear  = 1;
 volatile uint16_t dbg_time_year       = 2026;
 
+volatile bool tehditSendFlag = true;
 uint32_t lattime = 0;
 volatile uint32_t dbg_loopMaxMs = 0;
 volatile uint32_t dbg_loopOver20  = 0;   /* 20 ms'yi asan tur sayisi */
@@ -1443,7 +1444,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 void Debug_Data_Injector(void)
 {
     // Sistem çalıştığı an kendi kendine saniyede 25 kere (40ms) veri göndersin
-    if (HAL_GetTick() - lattime > 40)
+    if ((HAL_GetTick() - lattime > 40) && tehditSendFlag)
     {
         lattime = HAL_GetTick();
 

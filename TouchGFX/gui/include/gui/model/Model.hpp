@@ -50,6 +50,8 @@ public:
 		WARN_BLASTING_FAILED_FRAG,
 		WARN_FIRE_SUCCESS_SMOKE,
 		WARN_FIRE_SUCCESS_FRAG,
+		WARN_TLUS_SW_DEAD,          // "TLUS YAZILIMI YANIT VERMİYOR"
+		WARN_TLUS_FROZEN,           // "TLUS VERİSİ GÜNCELLENMİYOR"
 
 		// --- YENİ EKLENEN İŞLEMCİ UYARILARI ---
 		WARN_PROC_RAM,
@@ -370,6 +372,12 @@ private:
 	uint32_t lastBurstMs           = 0;
 	uint32_t lastCounterMeasureMs  = 0;
 	 bool tlus_comm_lost_flag = false;
+
+	 uint32_t lastSysStatusMs   = 0;
+	 uint16_t lastHeartbeat     = 0;
+	 uint8_t  heartbeatStall    = 0;      /* ardisik degismeyen mesaj sayisi */
+	 bool     tlusSwDeadFlag    = false;  /* 5 sn mesaj yok */
+	 bool     tlusFrozenFlag    = false;  /* heartbeat ilerlemiyor */
 };
 
 #endif // MODEL_HPP

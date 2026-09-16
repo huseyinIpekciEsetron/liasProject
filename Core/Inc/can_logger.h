@@ -18,6 +18,7 @@ typedef enum {
     LOG_FIRE_EVENT    = 0x02, // Atış başarılı/başarısız durumu
     LOG_TUBE_STATUS   = 0x03, // Tüp arıza ve doluluk değişimleri
     LOG_SYS_STATE     = 0x04  // Sistem şalter durumları (Armed, Smoke vs.)
+
 } CanLogType_t;
 
 // Sürücü Fonksiyonları

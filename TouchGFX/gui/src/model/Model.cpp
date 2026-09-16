@@ -188,6 +188,9 @@ void Model::dispatchWarning(WarningType warning, int tubeIndex)
         case WARN_COMM_LOST:           msgId = T_WARNFATALCOMM; break;
         case WARN_VOLTAGE_ERROR:       msgId = T_WARNVOLTAGE; break;
 
+        case WARN_TLUS_SW_DEAD:        msgId = T_WARNTLUSSW; break;
+        case WARN_TLUS_FROZEN:		   msgId = T_WARNTLUSFROZEN; break;
+
         // ATIŞ/MÜHİMMAT DURUMLARI
         case WARN_BLASTING_FAILED_SMOKE: msgId = T_WARNBLASTFAIL_SMOKE; break;
         case WARN_BLASTING_FAILED_FRAG:  msgId = T_WARNBLASTFAIL_FRAG; break;
@@ -318,7 +321,7 @@ void Model::processThreatAlarm()
     uint32_t now = HAL_GetTick();
 
     /* --- 1. TAZELIK: TLUS tehdit akisi kesildi mi? --- */
-    if ((now - lastThreatMsgMs) > THREAT_STALE_TIMEOUT_MS)
+    if ( ((now - lastThreatMsgMs) > THREAT_STALE_TIMEOUT_MS) || tlusFrozenFlag )
     {
         if (threatDataFresh)          /* yeni kopus - bir kere tetikle */
         {
@@ -1203,6 +1206,31 @@ void Model::processCBIT()
             }
         }
     }
+    // 3. TLUS SAGLIK KONTROLU
+	{
+		uint32_t now = HAL_GetTick();
+
+		/* ICD: sistem durum mesaji 1 sn periyotlu, 5 sn alinamazsa
+		 * TLUS yazilimi calismiyor kabul edilir. */
+		bool swDead = (lastSysStatusMs != 0U) && ((now - lastSysStatusMs) > 5000U);
+
+		if (swDead && !tlusSwDeadFlag) {
+			tlusSwDeadFlag = true;
+			dispatchWarning(WARN_TLUS_SW_DEAD);
+		} else if (!swDead) {
+			tlusSwDeadFlag = false;
+		}
+
+		/* ICD: heartbeat 5 kere artmazsa hata */
+		bool frozen = (heartbeatStall >= 5U);
+
+		if (frozen && !tlusFrozenFlag) {
+			tlusFrozenFlag = true;
+			dispatchWarning(WARN_TLUS_FROZEN);
+		} else if (!frozen) {
+			tlusFrozenFlag = false;
+		}
+	}
 }
 
 
@@ -1289,12 +1317,20 @@ void Model::onThreatsParsed(const TLUS::ThreatMessagePayload& payload)
 // ICD'den sistem durumları gelince
 void Model::onSystemStatusParsed(const TLUS::SystemStatusPayload& status)
 {
-	if(status.isValid)
-	{
-		// En taze veriyi geçici bir değişkene (latestSystemStatus) al ve Tick'e haber ver
-		latestSystemStatus = status;
-		faultUpdate = true;
+	/* Gecerli olsun olmasin, mesajin GELDIGI bilgisi tazelik icin degerli */
+	lastSysStatusMs = HAL_GetTick();
+
+	/* ICD: heartbeat saniyelik artan sayici. 5 mesaj boyunca degismezse
+	 * TLUS'un ag katmani calisiyor ama uygulama katmani donmus demektir.
+	 * Paketler akmaya devam ettigi icin tazelik kontrolu bunu yakalamaz. */
+	if (status.heartbeat == lastHeartbeat) {
+		if (heartbeatStall < 255U) heartbeatStall++;
+	} else {
+		heartbeatStall = 0U;
+		lastHeartbeat  = status.heartbeat;
 	}
+
+	if (status.isValid) { latestSystemStatus = status; faultUpdate = true; }
 }
 
 void Model::onGvdDataParsed(const TLUS::GvdMessagePayload& payload)

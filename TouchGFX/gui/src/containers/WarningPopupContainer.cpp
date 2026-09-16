@@ -61,6 +61,8 @@ void WarningPopupContainer::showNextWarning()
         case Model::WARN_COMM_ERROR:          msgId = T_WARNCOMMERR; break;
         case Model::WARN_COMM_LOST:           msgId = T_WARNFATALCOMM; break;
         case Model::WARN_VOLTAGE_ERROR:       msgId = T_WARNVOLTAGE; break;
+        case Model::WARN_TLUS_SW_DEAD:        msgId = T_WARNTLUSSW; break;
+        case Model::WARN_TLUS_FROZEN:         msgId = T_WARNTLUSFROZEN; break;
 
         // --- YENİ ATIŞ MESAJLARI (Hepsinde %d olduğu için hasWildcard = true) ---
         case Model::WARN_BLASTING_FAILED_SMOKE: msgId = T_WARNBLASTFAIL_SMOKE; hasWildcard = true; break;

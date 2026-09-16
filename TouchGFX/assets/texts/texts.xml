@@ -30,6 +30,14 @@
         <Translation Language="GB">SİSTEM BAŞLATILDI</Translation>
         <Translation Language="ENG">SYSTEM STARTED</Translation>
       </Text>
+      <Text Id="WARNTLUSFROZEN" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">TLUS VERİSİ GÜNCELLENMİYOR</Translation>
+        <Translation Language="ENG">TLUS DATA IS NOT BEING UPDATED</Translation>
+      </Text>
+      <Text Id="WARNTLUSSW" Alignment="Left" TypographyId="RadarFont">
+        <Translation Language="GB">TLUS YAZILIMI YANIT VERMİYOR!</Translation>
+        <Translation Language="ENG">TLUS SOFTWARE IS NOT RESPONDING!</Translation>
+      </Text>
       <Text Id="WARNBLASTFAIL_FRAG" Alignment="Left" TypographyId="RadarFont">
         <Translation Language="GB">ATIŞ BAŞARISIZ (TAHRİP) - %d</Translation>
         <Translation Language="ENG">FIRING FAILED (FRAGMENTATION) - %d</Translation>
